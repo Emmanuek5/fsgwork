@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <title>FSG Work Solutions</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Fira+Sans:wght@500&family=Lato:ital@1&family=Oswald&family=PT+Serif:wght@700&family=Roboto&family=Rubik:ital,wght@1,500&family=Ubuntu:wght@500&display=swap");
+      body {
+        margin: 0;
+      }
+
+      .header {
+        display: flex;
+        font-family: "Oswald", Roboto, sans-serif;
+        justify-content: space-between;
+        align-items: center;
+        height: 80px;
+        background-color: #333;
+        color: white;
+        padding: 10px 20px;
+      }
+
+      .left {
+        display: flex;
+        align-items: center;
+      }
+
+      .logo {
+        width: 40px;
+        height: 40px;
+        margin-right: 10px;
+      }
+
+      .header h2 {
+        margin: 0;
+        font-size: 1.5em;
+        font-family: "Ubuntu", Roboto, sans-serif;
+        font-weight: bolder;
+      }
+
+      ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+      }
+
+      li {
+        margin-right: 20px;
+        text-decoration: none;
+        color: white;
+        padding: 8px 15px;
+        border: 1px solid white;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+      }
+
+      li:hover {
+        transition: background-color 0.3s ease-in-out !important;
+        transform: scale(1.1) translateY(-5px);
+        background-color: white !important;
+        color: #333 !important;
+      }
+
+      a {
+        text-decoration: none;
+        color: white;
+      }
+
+      a:hover {
+        text-decoration: none;
+      }
+
+      .header_mobile {
+        display: none;
+      }
+
+      .toggle-btn {
+        display: none;
+        cursor: pointer;
+        font-size: 1.5em;
+      }
+
+      .dropdown {
+        position: relative;
+        display: inline-block;
+        z-index: 1; /* Set a higher z-index value */
+      }
+      .dropdown-content {
+        font-family: "Roboto", sans-serif;
+        position: absolute;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        width: 200px; /* Set the desired width */
+        z-index: 2; /* Set a higher z-index value */
+        margin-top: 10px; /* Adjust the top margin as needed */
+        right: 0; /* Align to the right edge of the parent */
+        padding: 10px;
+      }
+
+      .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        border: 1px solid #ddd;
+        border-radius: 15px;
+        margin: 5px;
+      }
+
+      .dropdown-content i {
+        margin-right: 5px;
+      }
+
+      @media screen and (max-width: 768px) {
+        .header {
+          display: none;
+        }
+
+        .header_mobile {
+          display: flex;
+          font-family: "Roboto", sans-serif;
+          font-weight: bolder;
+          justify-content: space-between;
+          align-items: center;
+          height: 80px;
+          background-color: #333;
+          color: white;
+          padding: 10px 20px;
+        }
+
+        .toggle-btn {
+          color: white;
+          background-color: #4e4d4d;
+          display: block;
+          font-size: 1.5em;
+          margin-right: 10px;
+        }
+
+        .dropdown {
+          width: 95%;
+        }
+        .sidebar {
+          display: none;
+          position: absolute;
+          width: 100%;
+          height: 500px;
+          top: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 1;
+        }
+
+        .sidebar ul {
+          display: block;
+          justify-content: space-between;
+          align-items: center;
+          margin-left: 30px;
+        }
+
+        .sidebar li:nth-child(1) {
+          margin-top: 10px;
+          margin-bottom: 10px;
+          text-decoration: none;
+        }
+        .sidebar li {
+          margin-bottom: 10px;
+          text-decoration: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <input type="hidden" name="authenticated" value="<<$authenticated>>" />
+
+    <nav class="header">
+      <div class="left">
+        <img src="/assets/logo.png" alt="logo" class="logo" />
+        <h2><a href="/">FSG Work Solutions</a></h2>
+      </div>
+      <div class="right">
+        <ul>
+          <li><a href="/about">About Us</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+          <li><a href="/openings">Job Openings</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/blog">Blog</a></li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="header_mobile">
+      <div class="left">
+        <img src="/assets/logo.png" alt="logo" class="logo" />
+        <h2><a href="/">FSG Work Solutions</a></h2>
+      </div>
+      <div class="right">
+        <button class="toggle-btn" onclick="toggleMobileHeader()">
+          <i class="fa fa-bars"></i>
+        </button>
+      </div>
+      <div class="w3-grey w3-display-right sidebar">
+        <button class="close_btn" id="closeBtn" onclick="toggleMobileHeader()">
+          <i class="fa fa-times"></i>
+        </button>
+        <ul>
+          <a href="/about"><li>About Us</li></a>
+          <a href="/contact"> <li>Contact Us</li></a>
+          <a href="/openings"> <li>Job Openings</li></a>
+
+          <a href="/services"> <li>Services</li></a>
+          <a href="/blog"> <li>Blog</li></a>
+        </ul>
+      </div>
+    </nav>
+
+    <script>
+      function toggleMobileHeader() {
+        const sidebar = document.querySelector(".sidebar");
+        if (sidebar.style.display === "block") {
+          sidebar.style.display = "none";
+        } else {
+          sidebar.style.display = "block";
+        }
+      }
+
+      const authenticated_element = document.querySelector(
+        "input[name='authenticated']"
+      ).value;
+
+      const isAuth = authenticated_element === "true" ? true : false;
+      console.log(isAuth);
+
+      const ul = document.querySelectorAll("ul");
+
+      if (isAuth) {
+        ul.forEach((ul) => {
+          const li = document.createElement("li");
+          li.classList.add("dropdown");
+          li.classList.add("w3-dropdown-hover");
+          const a = document.createElement("a");
+          a.href = "javascript:void(0);"; // Use javascript:void(0); to prevent the page from scrolling to the top
+          a.innerHTML =
+            "<i class='fa fa-solid fa-user'></i> Profile <i class='fa fa-caret-down'></i>";
+
+          // Add the dropdown content
+          const dropdownContent = document.createElement("div");
+          dropdownContent.classList.add("dropdown-content");
+          dropdownContent.classList.add("w3-dropdown-content");
+          dropdownContent.innerHTML =
+            "<a href='/profile'><i class='fa fa-solid fa-user'></i> View Profile</a><a href='/applications'> <i class='fa fa-solid fa-file-lines'></i>View Applications</a><a href='/logout'> <i class='fa fa-solid fa-right-from-bracket'></i> Logout</a>";
+
+          a.appendChild(dropdownContent);
+          li.appendChild(a);
+          ul.appendChild(li);
+        });
+      } else {
+        ul.forEach((ul) => {
+          const li = document.createElement("li");
+          const a = document.createElement("a");
+          li.classList.add("w3-red");
+          a.href = "/auth/login";
+          li.innerHTML = "<i class='fa-solid fa-right-to-bracket'></i> Login";
+          a.appendChild(li);
+          ul.appendChild(a);
+        });
+      }
+    </script>
+    <<$content>>
+  </body>
+</html>

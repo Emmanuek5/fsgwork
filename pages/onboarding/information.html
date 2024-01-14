@@ -1,0 +1,162 @@
+<script>
+  if (!isAuth) {
+    window.location.href = "/auth/login?next_to=/onboarding/information";
+  }
+</script>
+<style>
+  .profile_container {
+    font-family: "Roboto", sans-serif;
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    animation: slideIn 1.5s ease-in-out;
+  }
+
+  .slide-out {
+    animation: slideOut 1.2s ease-in-out;
+  }
+  @keyframes slideIn {
+    from {
+      transform: scale(0.5);
+      transform: translateX(-100%);
+    }
+    to {
+      transform: scale(1);
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  .top {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .top h1 {
+    background-color: #f9f9f9;
+    font-weight: bolder;
+    color: #333;
+  }
+
+  .content {
+    padding: 20px;
+    border-radius: 5px;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .input_container {
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  textarea,
+  input,
+  select {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 5px;
+  }
+
+  input[type="submit"]:hover {
+    background-color: #45a049;
+  }
+
+  .error {
+    display: none;
+    color: #ff5252;
+    background-color: #ffebee;
+    margin-top: 10px;
+  }
+
+  .word-count {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    color: #888;
+  }
+  select {
+    padding: 5px;
+  }
+</style>
+
+<div class="w3-container bar_container">
+  <div class="onboarding_progress">
+    <div class="progress-point current">
+      <i class="fas fa-circle"></i>
+    </div>
+    <div class="progress-point next">
+      <i class="fas fa-circle"></i>
+    </div>
+    <div class="progress-point next">
+      <i class="fas fa-circle"></i>
+    </div>
+    <!-- Add more progress points as needed -->
+  </div>
+</div>
+<div class="profile_container w3-container w3-card-4 w3-border">
+  <div class="top">
+    <h1>Addition Information</h1>
+  </div>
+  <div class="content">
+    <div class="error">
+      <p id="error_message"></p>
+    </div>
+    <form action="">
+      <div class="input_container">
+        <label for="phone">Phone Number</label>
+        <input type="text" name="phone" id="phone" />
+      </div>
+      <div class="input_container">
+        <label for="address">Address</label>
+        <input type="text" name="address" id="address" required />
+      </div>
+      <input type="submit" class="w3-button w3-green" value="Finish" />
+    </form>
+  </div>
+  <script>
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      fetch("/api/onboarding/information", {
+        method: "POST",
+        body: formData,
+      }).then((res) => {
+        res.json().then((data) => {
+          if (data.success) {
+            document.querySelector(".container").classList.add("slide-out");
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 500); // Adjust the timeout duration based on your animation duration
+          } else {
+            document.querySelector(".error").style.display = "block";
+            document.getElementById("error_message").textContent = data.message;
+          }
+        });
+      });
+    });
+  </script>
+</div>

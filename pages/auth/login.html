@@ -1,0 +1,80 @@
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Lato:ital@1&family=Oswald&display=swap");
+  .container h1 {
+    margin-bottom: 20px;
+    font-family: "Lato", sans-serif;
+    font-family: "Oswald", sans-serif;
+  }
+  .form_container {
+    width: 400px;
+    margin-bottom: 20px;
+  }
+
+  .input_container {
+    margin-bottom: 20px;
+  }
+
+  .container p {
+    font-size: 1.2em;
+  }
+  .container a {
+    text-decoration: none;
+    color: blue;
+  }
+
+  .container a:hover {
+    text-decoration: underline;
+    background-color: white;
+  }
+
+  .error {
+    display: none;
+  }
+</style>
+<div class="container w3-container w3-card-4 w3-display-middle">
+  <div class="form_container w3-container">
+    <h1>Login</h1>
+    <div class="w3-container w3-red error">
+      <p class="error_message"></p>
+    </div>
+    <form action="">
+      <div class="input_container">
+        <label for="email">Email</label>
+        <input type="email" class="w3-input" name="email" id="email" />
+      </div>
+      <div class="input_container">
+        <label for="password">Password</label>
+        <input type="password" class="w3-input" name="password" id="password" />
+      </div>
+      <button type="submit" class="w3-button w3-black w3-hover-blue">
+        Login
+      </button>
+    </form>
+    <div class="w3-container">
+      <p>Don't have an account? <a href="/auth/signup">Signup</a></p>
+    </div>
+  </div>
+  <script>
+    const form = document.querySelector("form");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      fetch("/api/auth/login", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.success) {
+            if (!next()) {
+              window.location.href = "/";
+            }
+          } else {
+            const container = document.querySelector(".error");
+            container.style.display = "block";
+            container.querySelector(".error_message").innerHTML = res.message;
+          }
+        });
+    });
+  </script>
+</div>

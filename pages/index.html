@@ -1,0 +1,575 @@
+<style>
+  body {
+    margin: 0;
+    font-family: "Lato", sans-serif;
+  }
+
+  .page_top {
+    background: linear-gradient(to right, #612f77, #5c0f6b);
+    /* Gradient purple background */
+    color: white;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    height: 300px; /* Set a fixed height to prevent the page from moving */
+  }
+
+  .page_top .middle {
+    height: 100px;
+  }
+
+  .page_top::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      to bottom right,
+      rgba(255, 255, 255, 0.2),
+      rgba(255, 255, 255, 0.1)
+    ); /* Shiny white overlay */
+    pointer-events: none;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 3em; /* Increased font size for a more prominent header */
+    font-family: "Ubuntu", sans-serif;
+    text-shadow: 2px 2px 4px #333; /* Added a subtle text shadow for better visibility */
+  }
+
+  #cursor {
+    display: inline-block;
+    animation: blinkCursor 1s infinite; /* Blinking animation */
+  }
+
+  @keyframes blinkCursor {
+    50% {
+      opacity: 0; /* Make the cursor disappear at 50% of the animation */
+    }
+  }
+
+  .input_container {
+    position: relative;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping for smaller screens */
+  }
+
+  .input_container i {
+    margin-right: 10px;
+  }
+
+  input {
+    padding: 15px; /* Increased padding for a larger input area */
+    margin-right: 10px;
+    width: 60%; /* Adjusted width for better responsiveness */
+    border: 2px solid #555; /* Added border for a cleaner look */
+    border-radius: 5px;
+  }
+
+  button {
+    padding: 15px 20px;
+    background-color: #555;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .page_middle {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  /* Adjust these styles in your existing CSS */
+
+  .jobs_container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 0;
+  }
+
+  .jobs_container1 h2 {
+    font: size 30px;
+    text-align: center;
+    font-family: "Bebas Neue", sans-serif;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .job {
+    margin: 1cm;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    word-wrap: break-word; /* Corrected property */
+    width: calc(33.33% - 2cm);
+
+    h3 {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    h4 {
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    p {
+      color: #777;
+      margin: 10px 0;
+    }
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+
+  h3,
+  h4,
+  p {
+    margin: 0;
+  }
+
+  .bottom {
+    color: #555;
+  }
+
+  .testimonials {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .testimonials h3 {
+    margin-top: 0;
+    text-align: center;
+    width: 100%;
+    font-family: "Rubik", sans-serif;
+    font-size: 3em;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+  }
+
+  .testiony {
+    display: inline-block;
+    vertical-align: top;
+    text-align: center;
+    width: 30%;
+    box-sizing: border-box;
+    border: 1px solid #ddd; /* Lighter border color for a subtle look */
+    border-radius: 8px; /* Increased border-radius for rounded corners */
+    margin: 20px;
+    padding: 20px;
+    background-color: #fff; /* White background for contrast */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* subtle box shadow for depth */
+  }
+
+  .testiony img {
+    border-radius: 50%; /* Rounded border for circular images */
+  }
+
+  .testiony h4 {
+    margin-top: 10px;
+    font-size: 1.2em;
+    color: #555; /* Slightly darker text color for better readability */
+  }
+
+  .testiony p {
+    margin-top: 19px;
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #777; /* Lighter text color for better contrast */
+  }
+
+  .testiony q {
+    display: block;
+    margin-top: 15px;
+    font-style: italic;
+    color: #555; /* Slightly darker text color for better readability */
+  }
+
+  .no_jobs {
+    text-align: center;
+  }
+
+  .buy-premium-container {
+    background-color: #f2f2f2;
+    padding: 40px; /* Increased padding for a better look */
+    text-align: center;
+    margin-top: 40px; /* Increased margin for better separation */
+  }
+
+  .buy-premium-container h2 {
+    color: #333; /* Darker text color for better readability */
+  }
+
+  .buy-premium-container p {
+    margin-top: 20px;
+    color: #555; /* Slightly darker text color */
+  }
+
+  .buy-premium-container .premium-button {
+    padding: 15px 20px;
+    background-color: #ff7f50; /* Coral color for the button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 20px;
+  }
+
+  /* Styles for the signup container */
+  .signup-container {
+    background-color: #e6e6e6; /* Lighter background color for the signup container */
+    padding: 40px; /* Increased padding for a better look */
+    text-align: center;
+    margin-top: 40px; /* Increased margin for better separation */
+  }
+
+  .signup-container h2 {
+    color: #555; /* Darker text color for better readability */
+  }
+
+  .signup-container p {
+    margin-top: 20px;
+    color: #777; /* Slightly darker text color */
+  }
+
+  .signup-container .signup-button {
+    background-color: #007bff; /* Blue color for the signup button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 20px;
+  }
+  @media only screen and (max-width: 600px) {
+    /* Adjustments for jobs_container */
+    .jobs_container,
+    .jobs_container1 {
+      display: block;
+      word-wrap: break-word;
+      width: 100%;
+    }
+
+    .jobs_container1 h2 {
+      text-align: center;
+    }
+
+    .job {
+      margin: 1cm;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease-in-out;
+      word-wrap: break-word; /* Corrected property */
+      width: 80%; /* Adjusted width for mobile */
+      margin-right: 10px; /* Add margin to the right side */
+    }
+
+    .job .top {
+      padding-bottom: 10px; /* Add some padding to the bottom of the top section */
+      border-bottom: 1px solid #ddd; /* Add a border to separate top and bottom sections */
+    }
+
+    .bottom {
+      padding-top: 10px; /* Add some padding to the top of the bottom section */
+    }
+
+    /* Add this to ensure the job text doesn't overflow on mobile */
+    .job p {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Adjustments for testimonials */
+    .testimonials {
+      padding: 20px;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .testiony {
+      flex: 0 0 100%;
+      width: 100%;
+      margin: 20px 0;
+    }
+  }
+
+  .footer {
+    background-color: #333; /* Darker background color for the footer */
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    color: #ccc; /* Lighter text color for better contrast */
+    padding: 20px; /* Increased padding for better spacing */
+  }
+
+  .footer p {
+    margin: 5px 0; /* Adjusted margin for better spacing between paragraphs */
+  }
+
+  /* Add these styles to your existing CSS *s/
+
+  /* Differentiate input and button in the input_container */
+  .input_container input {
+    background-color: #f8f8f8; /* Light gray background for input */
+  }
+
+  .input_container button {
+    background-color: #333; /* Dark gray background for button */
+  }
+
+  /* Differentiate the job cards in the jobs_container */
+  .job {
+    background-color: #fff; /* White background for job cards */
+  }
+
+  /* Add border and shadow for a card-like appearance */
+  .job {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Differentiate the testimonials section */
+  .testiony {
+    background-color: #f8f8f8; /* Light gray background for testimonials */
+    border: 1px solid #ddd; /* Lighter border color for a subtle look */
+  }
+
+  /* Differentiate the premium container */
+  .buy-premium-container {
+    background-color: #e6e6e6; /* Lighter background color for the premium container */
+  }
+
+  .buy-premium-container h2 {
+    color: #555; /* Darker text color for better readability */
+  }
+
+  .buy-premium-container p {
+    color: #777; /* Slightly darker text color */
+  }
+
+  .buy-premium-container .premium-button {
+    background-color: #ff7f50; /* Coral color for the button */
+  }
+
+  /* Differentiate the footer */
+  .footer {
+    background-color: #222; /* Darker background color for the footer */
+    color: #888; /* Lighter text color for better contrast */
+  }
+</style>
+
+<div class="container">
+  <div class="page_top w3-container" id="top">
+    <div class="middle">
+      <h1>Fsg Work Solutions</h1>
+      <div class="input_container">
+        <input type="text" name="job" id="" placeholder="Search for jobs" />
+        <button><i class="fa fa-search"></i>Search</button>
+      </div>
+    </div>
+  </div>
+  <div class="page_middle">
+    <div class="jobs_container1">
+      <h2>Job Openings</h2>
+      <div class="jobs_container"></div>
+    </div>
+    <div class="testimonials" id="testimonials">
+      <h3>Testimonials</h3>
+      <div class="w3-container testiony">
+        <img src="/assets/user.png" alt="" />
+        <h4>Jack Dorsey</h4>
+        <p>
+          <q>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+            Necessitatibus placeat blanditiis libero tempora esse dolor deleniti
+            voluptates maxime quaerat, ducimus maiores magni amet nesciunt cum
+            cupiditate vitae. Reiciendis, vitae aspernatur.
+          </q>
+        </p>
+      </div>
+      <div class="w3-container testiony">
+        <img src="/assets/user.png" alt="" />
+        <h4>Jack Dorsey</h4>
+        <p>
+          <q>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+            Necessitatibus placeat blanditiis libero tempora esse dolor deleniti
+            voluptates maxime quaerat, ducimus maiores magni amet nesciunt cum
+            cupiditate vitae. Reiciendis, vitae aspernatur.</q
+          >
+        </p>
+      </div>
+      <div class="w3-container testiony">
+        <img src="/assets/user.png" alt="" />
+        <h4>Jack Dorsey</h4>
+        <p>
+          <q
+            >Lorem ipsum dolor sit amet consectetur adipisicing elit.
+            Necessitatibus placeat blanditiis libero tempora esse dolor deleniti
+            voluptates maxime quaerat, ducimus maiores magni amet nesciunt cum
+            cupiditate vitae. Reiciendis, vitae aspernatur.</q
+          >
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="switch_cont"></div>
+  <div class="footer w3-container">
+    <p>By Fsg Work Solutions</p>
+    <p>© 2023 Fsg Work Solutions. All rights reserved.</p>
+  </div>
+</div>
+
+<script>
+  const switch_cont = document.querySelector(".switch_cont");
+  if (isAuth) {
+    switch_cont.innerHTML = `<div class="buy-premium-container">
+      <!-- Container asking people to buy premium -->
+      <h2>Upgrade to Premium for Exclusive Benefits!</h2>
+      <p>
+        Unlock premium features and enhance your experience with Fsg Work
+        Solutions.
+      </p>
+     <a href="/premium"> <button class="premium-button">Upgrade Now</button></a>
+    </div>`;
+  } else {
+    switch_cont.innerHTML = ` <div class="signup-container">
+      <h2>Create an Account for Personalized Services</h2>
+      <p>Unlock personalized features and access a wide range of services by creating an account with Fsg Work Solutions.</p>
+     <a href="/auth/signup"> <button class="signup-button">Sign Up</button></a>
+    </div>`;
+  }
+
+  const headerText = [
+    "FSG Work Solutions.",
+    "We are here to help you.",
+    "Looking for a job?",
+    "We are here to help you.",
+    "Looking to Improve your skills?",
+  ];
+
+  const h1 = document.querySelector("h1");
+  h1.innerHTML = "|";
+  let index = 0;
+  let charIndex = 0;
+  let isTyping = true;
+
+  function changeHeaderText() {
+    const currentText = headerText[index];
+    const displayedText = currentText.slice(0, charIndex);
+    let cursor = "|";
+
+    if (isTyping) {
+      if (charIndex === currentText.length) {
+        isTyping = false;
+        setTimeout(() => {
+          isTyping = true;
+          charIndex = 0;
+          index = (index + 1) % headerText.length;
+          if (index === 0) {
+            setTimeout(() => {
+              h1.innerHTML = h1.innerHTML.replace("|", "");
+              clearInterval(intervalId);
+            }, 2000);
+          }
+        }, 2000);
+      } else {
+        charIndex++;
+      }
+    } else {
+      if (charIndex > 0) {
+        charIndex--;
+      } else {
+        isTyping = true;
+      }
+    }
+
+    h1.innerHTML = `${displayedText}<span id="cursor">${cursor}</span>`;
+  }
+
+  const intervalId = setInterval(changeHeaderText, 100);
+
+  const input = document.querySelector("input[name=job]");
+
+  input.addEventListener("input", (e) => {
+    const value = e.target.value;
+    fetch(`/api/job/jobs?q=${value}&limit=9`).then((res) => {
+      res.json().then((data) => {
+        const jobsContainer = document.querySelector(".jobs_container");
+        if (data.length === 0) {
+          jobsContainer.innerHTML =
+            "<h2 class='no_jobs'>No Jobs Openings Found</h2>";
+          return;
+        }
+        jobsContainer.innerHTML = "";
+        data.forEach((job) => {
+          const jobElement = document.createElement("div");
+          jobElement.classList.add("job");
+
+          jobElement.innerHTML = `
+            <a href="/jobs/${job.id}">
+            <div class="top">
+              <h3><a href="/jobs/${job.id}">${job.title || job.name}</a></h3>
+              <h4>${job.company}</h4>
+              <p>${job.location}</p>
+            </div>
+            <div class="bottom">
+              <p>${job.description}</p>
+            </div>
+          </a>
+          `;
+
+          jobsContainer.appendChild(jobElement);
+        });
+      });
+    });
+  });
+
+  fetch("/api/job/jobs?limit=9").then((res) => {
+    res.json().then((data) => {
+      const jobsContainer = document.querySelector(".jobs_container");
+      if (data.length === 0) {
+        jobsContainer.innerHTML += "<h2 class='no_jobs'>No Jobs Found</h2>";
+        return;
+      }
+      data.forEach((job) => {
+        const jobElement = document.createElement("div");
+        jobElement.classList.add("job");
+
+        jobElement.innerHTML = `
+        <a href="/jobs/${job.id}">
+          <div class="top">
+            <h3>${job.title || job.name}</h3>
+            <h4>${job.company}</h4>
+            <p>${job.location}</p>
+          </div>
+          <div class="bottom">
+            <p>${job.description}</p>
+          </div>
+        </a>
+      `;
+
+        jobsContainer.appendChild(jobElement);
+      });
+    });
+  });
+</script>

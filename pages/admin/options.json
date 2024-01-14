@@ -1,0 +1,7 @@
+{
+  "layout": "admin",
+  "security": {
+    "required_level": 1,
+    "redirect": "/"
+  }
+}

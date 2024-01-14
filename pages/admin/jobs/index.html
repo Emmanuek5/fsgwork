@@ -1,0 +1,287 @@
+<style>
+  body {
+    font-family: "Roboto", sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 80%;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+
+  .top {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .top h1 {
+    font-weight: bolder;
+    font-size: 2em;
+    color: #333;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+
+  .description {
+    max-width: 300px;
+    word-break: break-all;
+  }
+  th,
+  td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f5f5f5;
+  }
+
+  button {
+    padding: 8px 12px;
+    margin: 2px;
+    cursor: pointer;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
+
+  button:hover {
+    background-color: #45a049;
+  }
+
+  .bottom_bar {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .pagination-wheel {
+    display: inline-block;
+  }
+
+  .pagination-buttons {
+    display: inline-block;
+    margin-left: 20px;
+  }
+
+  .pagination-buttons button {
+    padding: 8px 12px;
+    margin: 2px;
+    cursor: pointer;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
+
+  .pagination-buttons button:hover {
+    background-color: #45a049;
+  }
+</style>
+<div class="w3-container container">
+  <div class="top">
+    <h1>All Jobs</h1>
+    <select name="filter" id="">
+      <option value="asc">Latest</option>
+      <option value="desc">Oldest</option>
+    </select>
+  </div>
+  <table class="w3-table">
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Location</th>
+      <th>Salary</th>
+    </tr>
+  </table>
+  <div class="bottom_bar">
+    <div class="pagination-wheel"></div>
+    <div class="pagination-buttons"></div>
+  </div>
+  <script>
+    const filter = document.querySelector("select");
+
+    let order = "asc";
+    let page = 1;
+
+    filter.addEventListener("change", (event) => {
+      order = event.target.value;
+      getJobs(order, page);
+    });
+
+    fetch("/api/job/pagenumber?limit=10").then((res) => {
+      res.json().then((data) => {
+        const wheel = document.querySelector(".pagination-wheel");
+        const buttonsContainer = document.querySelector(".pagination-buttons");
+
+        const previousButton = document.createElement("button");
+        previousButton.innerHTML = "<i class='fas fa-chevron-left'></i>";
+        previousButton.addEventListener("click", () => {
+          if (page > 1) {
+            page--;
+            getJobs(order, page);
+          }
+        });
+        buttonsContainer.appendChild(previousButton);
+
+        const maxButtonsToShow = 10; // Adjust as needed
+        if (data <= maxButtonsToShow) {
+          for (let i = 1; i <= data; i++) {
+            const button = document.createElement("button");
+            button.innerText = i;
+            button.addEventListener("click", () => {
+              page = i;
+              getJobs(order, page);
+            });
+            buttonsContainer.appendChild(button);
+          }
+        } else {
+          const startPage = Math.max(
+            1,
+            page - Math.floor(maxButtonsToShow / 2)
+          );
+          const endPage = Math.min(data, startPage + maxButtonsToShow - 1);
+
+          if (startPage > 1) {
+            const ellipsisStart = document.createElement("span");
+            ellipsisStart.innerText = "...";
+            buttonsContainer.appendChild(ellipsisStart);
+          }
+
+          for (let i = startPage; i <= endPage; i++) {
+            const button = document.createElement("button");
+            button.innerText = i;
+            button.addEventListener("click", () => {
+              page = i;
+              getJobs(order, page);
+            });
+            buttonsContainer.appendChild(button);
+          }
+
+          if (endPage < data) {
+            const ellipsisEnd = document.createElement("span");
+            ellipsisEnd.innerText = "...";
+            buttonsContainer.appendChild(ellipsisEnd);
+          }
+        }
+
+        const nextButton = document.createElement("button");
+        nextButton.innerHTML = "<i class='fas fa-chevron-right'></i>";
+        nextButton.addEventListener("click", () => {
+          if (page < data) {
+            page++;
+            getJobs(order, page);
+          }
+        });
+        buttonsContainer.appendChild(nextButton);
+      });
+    });
+
+    function getJobs(order, page) {
+      fetch("/api/job/jobs?order=" + order + "&limit=10" + "&page=" + page)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`Failed to fetch jobs: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          const table = document.querySelector("table");
+          table.innerHTML = "";
+          data.forEach((job) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+            <td>${job.name || job.title}</td>
+            <td class="description">${job.description}</td>
+            <td>${job.location}</td>
+            <td>${job.salary}</td>
+            <td><button onclick="editJob( '${job.id}','${job.title}', '${
+              job.description
+            }', '${job.location}', '${job.salary}')">Edit</button></td>
+            <td><button onclick="deleteJob()" class="w3-red">Delete</button></td>
+          `;
+            table.appendChild(row);
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+
+    function editJob(id, title, description, location, salary) {
+      modal("input", "Edit Job", "Change Job Details", {
+        inputs: [
+          {
+            name: "id",
+            label: "",
+            type: "hidden",
+            value: id,
+          },
+          {
+            name: "title",
+            label: "Title",
+            type: "text",
+            value: title,
+          },
+          {
+            name: "description",
+            label: "Description",
+            type: "textarea",
+            value: description,
+          },
+          {
+            name: "location",
+            label: "Location",
+            type: "text",
+            value: location,
+          },
+          {
+            name: "salary",
+            label: "Salary",
+            type: "text",
+            value: salary,
+          },
+        ],
+      }).then((res) => {
+        if (res) {
+          fetch("/api/admin/job/edit", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(res),
+          }).then((res) => {
+            if (!res.ok) {
+              throw new Error(`Failed to edit job: ${res.status}`);
+            } else {
+              getJobs(order, page);
+              message("Job edited successfully", "top", "right", 4000);
+            }
+          });
+        }
+      });
+    }
+
+    function deleteJob() {
+      modal(
+        "question",
+        "Delete Job",
+        "Are you sure you want to delete this job?",
+        { yesLabel: "Yes", noLabel: "No" }
+      );
+    }
+
+    getJobs(order, page);
+  </script>
+</div>

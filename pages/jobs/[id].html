@@ -1,0 +1,256 @@
+<style>
+  body {
+    font-family: "Roboto", sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+  }
+
+  .job_container {
+    width: 80%;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    top: 40%;
+    word-wrap: break-word;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 5px;
+  }
+
+  .job_container h1 {
+    font-weight: bolder;
+  }
+
+  .job_container h3 {
+    font-weight: bold;
+    font-size: 20px;
+  }
+
+  .top {
+    display: flex;
+    background-color: whitesmoke;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    padding: 20px;
+    width: 100%;
+    margin-bottom: 20px;
+    align-items: flex-start; /* Align items to the top */
+    margin-bottom: 20px;
+  }
+
+  .job_container .left {
+    display: block;
+  }
+
+  .job_container .left h1 {
+    font-size: 24px;
+    color: #007bff;
+    margin: 0;
+  }
+
+  .qualification {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 10px;
+  }
+
+  .company {
+    font-size: 22px;
+    color: #444;
+    font-weight: bold;
+  }
+
+  .job_description {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #777;
+  }
+
+  .job_container .right {
+    position: relative;
+    margin-left: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: column; /* Stack buttons vertically */
+    align-items: flex-end; /* Align buttons to the right */
+    gap: 10px;
+  }
+
+  .job_container .right button {
+    margin-top: 10px;
+    width: auto;
+    min-width: 120px;
+    background-color: #8b1878;
+    margin-left: 10px;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+  }
+
+  .right button:nth-child(2) {
+    background-color: #fff;
+    color: #8b1878;
+    border: 1px solid #8b1878;
+    border-radius: 5px;
+  }
+
+  .job_container .right button i {
+    margin-right: 5px;
+  }
+
+  .job_container .right button:hover {
+    background-color: #fff;
+    color: #8b1878;
+  }
+
+  .job_container .right button:nth-child(2):hover {
+    background-color: #721857;
+    color: #fff;
+  }
+
+  .info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .w3-col {
+    width: 48%;
+  }
+
+  .w3-col i {
+    margin-right: 5px;
+    color: #3498db;
+  }
+
+  p {
+    margin: 0;
+    color: #333;
+    font-size: 14px;
+  }
+
+  .info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-family: "Ubuntu", sans-serif;
+    font-size: 30px;
+    padding: 10px;
+    background-color: #f2f2f2;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-right: 10px;
+  }
+
+  .info i {
+    margin-right: 5px;
+  }
+
+  .info p {
+    margin: 0;
+  }
+
+  @media screen and (max-width: 768px) {
+    .job_container {
+      width: calc(100% - 40px);
+      margin: 0;
+    }
+
+    .job_container .left,
+    .job_container .right {
+      width: 100%;
+      margin: 0;
+    }
+
+    .job_container .right {
+      margin-top: 10px;
+    }
+
+    .middle {
+      display: block;
+    }
+
+    .info {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .info i {
+      margin-right: 5px;
+      align-items: center;
+    }
+  }
+</style>
+
+<div class="job_container w3-container w3-display-middle">
+  <div class="top w3-container">
+    <div class="left">
+      <h1 class="job_title"></h1>
+      <h2 class="company"></h2>
+      <h3 class="qualification"></h3>
+      <p class="job_description"></p>
+    </div>
+    <div class="right">
+      <button><i class="fas fa-paper-plane"></i>Apply</button>
+      <button><i class="fas fa-bookmark"></i>Save</button>
+    </div>
+  </div>
+  <div class="middle w3-container w3-row">
+    <div class="w3-col s6">
+      <div class="info">
+        <i class="fas fa-calendar"></i>
+        <p class="start_date"></p>
+        <p class="end_date"></p>
+      </div>
+      <div class="info">
+        <i class="fas fa-location-arrow"></i>
+        <p class="job_location"></p>
+      </div>
+    </div>
+    <div class="w3-col s6">
+      <div class="info">
+        <i class="fas fa-dollar-sign"></i>
+        <p class="job_pay"></p>
+      </div>
+      <div class="info">
+        <i class="fas fa-briefcase"></i>
+        <p class="job_type"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const id = getValue("id");
+
+  fetch("/api/job/" + id)
+    .then((res) => res.json())
+    .then((data) => {
+      const jobContainer = document.querySelector(".job_container");
+
+      // Populate job details
+      jobContainer.querySelector(".job_title").textContent = data.name;
+      jobContainer.querySelector(".qualification").textContent =
+        data.required_qualification;
+      jobContainer.querySelector(".company").textContent = data.company;
+      jobContainer.querySelector(".job_description").textContent =
+        data.description;
+      jobContainer.querySelector(".start_date").textContent =
+        "Opening Period: " + data.date;
+      jobContainer.querySelector(".end_date").textContent =
+        "- " + data.close_date;
+      jobContainer.querySelector(".job_location").textContent =
+        "Location: " + data.location;
+      jobContainer.querySelector(".job_pay").textContent =
+        "Wage: " + data.salary;
+      jobContainer.querySelector(".job_type").textContent =
+        "Job Type: Full-time"; // You might want to add this data in your API response
+    });
+</script>

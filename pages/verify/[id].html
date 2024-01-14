@@ -1,0 +1,80 @@
+<style>
+  body {
+    font-family: "Ubuntu", sans-serif;
+  }
+  h2 {
+    font-family: "Fira Sans", sans-serif;
+    font-size: 1.5em;
+  }
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Ensure it's above other elements */
+  }
+
+  .spinner {
+    border: 6px solid #f3f3f3; /* Light grey */
+    border-top: 6px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+<div class="overlay">
+  <div class="spinner"></div>
+</div>
+
+<div
+  class="w3-container w3-card-4 w3-display-middle w3-grey container w3-padding-16"
+>
+  <div class="w3-container">
+    <h2>Checking your verification link</h2>
+    <p>Please wait...</p>
+  </div>
+  <script>
+    const id = getValue("id");
+    const container = document.querySelector(".container");
+    const overlay = document.querySelector(".overlay");
+
+    setTimeout(() => {
+      fetch(`/api/auth/verify/${id}`, {
+        method: "GET",
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          overlay.style.display = "none"; // Hide overlay after response
+
+          if (res.success) {
+            container.classList.remove("w3-grey");
+            container.classList.add("w3-green");
+            container.innerHTML = `<h2>Account verified</h2><p>Your account has been verified.</p>`;
+            setTimeout(() => {
+              window.location.href = "/onbaording/profile";
+            }, 2000);
+          } else {
+            container.classList.remove("w3-grey");
+            container.classList.add("w3-red");
+            container.innerHTML = `<h2>Verification failed</h2><p>${res.message}</p>`;
+          }
+        });
+    }, 3000);
+  </script>
+</div>

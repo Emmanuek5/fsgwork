@@ -1,0 +1,291 @@
+<script>
+  if (!isAuth) {
+    window.location.href = "/auth/login?next_to=/onboarding/profile";
+  }
+</script>
+<style>
+  .profile_container {
+    font-family: "Roboto", sans-serif;
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    animation: slideIn 1.5s ease-in-out;
+  }
+
+  .slide-out {
+    animation: slideOut 1.2s ease-in-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: scale(0.5);
+    }
+    to {
+      transform: translateX(1);
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  .top {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .top h1 {
+    background-color: #f9f9f9;
+    font-weight: bolder;
+    color: #333;
+  }
+
+  .content {
+    padding: 20px;
+    border-radius: 5px;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .input_container {
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  textarea,
+  input,
+  select {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 5px;
+  }
+
+  input[type="submit"]:hover {
+    background-color: #45a049;
+  }
+
+  .error {
+    display: none;
+    color: #ff5252;
+    background-color: #ffebee;
+    margin-top: 10px;
+  }
+
+  .word-count {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    color: #888;
+  }
+  select {
+    padding: 5px;
+  }
+
+  button {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #555;
+  }
+</style>
+
+<div class="w3-container bar_container">
+  <div class="onboarding_progress">
+    <div class="progress-point current">
+      <i class="fas fa-circle"></i>
+    </div>
+    <div class="progress-point next">
+      <i class="fas fa-circle"></i>
+    </div>
+    <div class="progress-point next">
+      <i class="fas fa-circle"></i>
+    </div>
+    <!-- Add more progress points as needed -->
+  </div>
+</div>
+<div class="profile_container w3-container w3-card-4 w3-border">
+  <div class="top">
+    <h1>Customize your profile</h1>
+  </div>
+  <div class="content">
+    <div class="error">
+      <p id="error_message"></p>
+    </div>
+    <form action="" onsubmit="return validateForm()">
+      <div class="input_container">
+        <label for="occupation">Occupation</label>
+        <input type="text" name="occupation" id="occupation" required />
+      </div>
+      <div class="input_container">
+        <label for="bio">Bio:</label>
+        <textarea
+          name="bio"
+          id="bio"
+          cols="30"
+          rows="10"
+          oninput="updateWordCount(this)"
+        ></textarea>
+        <div class="word-count" id="wordCount">0/100</div>
+      </div>
+      <div class="input_container w3-row">
+        <div class="w3-col s6">
+          <label for="qualification">Qualification</label>
+          <select name="qualification" id="qualifications"></select>
+        </div>
+        <div class="w3-col s6">
+          <label for="skills">Skills</label>
+          <select name="skills" id="skills"></select>
+        </div>
+      </div>
+      <div class="input_container">
+        <label for="cv">Your CV:</label>
+        <input
+          type="file"
+          name="cv"
+          id="cv"
+          accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          required
+        />
+      </div>
+      <button type="submit">
+        Next
+        <span id="nextIcon"
+          ><i class="fa-solid fa-arrow-right fa-2xs"></i
+        ></span>
+      </button>
+    </form>
+  </div>
+  <script>
+    const qualifications_select = document.querySelector("#qualifications");
+    const skills_select = document.querySelector("#skills");
+    const form = document.querySelector("form");
+    const max_words = 100;
+
+    function updateWordCount(textarea) {
+      let words = textarea.value.trim().split(/\s+/).filter(Boolean).length;
+      if (words > max_words) {
+        words = max_words;
+        textarea.value = textarea.value
+          .trim()
+          .split(/\s+/)
+          .slice(0, max_words)
+          .join(" ");
+      }
+      document.getElementById(
+        "wordCount"
+      ).textContent = `${words}/${max_words}`;
+    }
+
+    function validateForm() {
+      const bioTextarea = document.getElementById("bio");
+      const words = bioTextarea.value
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean).length;
+
+      if (words < 10) {
+        document.getElementById("error_message").textContent =
+          "Bio must contain at least 10 words.";
+        document.querySelector(".error").style.display = "block";
+        return false;
+      }
+
+      return true;
+    }
+
+    fetch("/api/onboarding/qualifications").then((res) => {
+      return res.json().then((data) => {
+        if (data.length > 0) {
+          //add a default option
+          const option = document.createElement("option");
+          option.value = "";
+          option.textContent = "Select qualifications";
+          qualifications_select.appendChild(option);
+          data.forEach((q) => {
+            const option = document.createElement("option");
+            option.value = q.value;
+            option.textContent = q.name;
+            qualifications_select.appendChild(option);
+          });
+        } else {
+          const option = document.createElement("option");
+          option.value = "";
+          option.textContent = "No qualifications";
+          qualifications_select.appendChild(option);
+        }
+      });
+    });
+
+    fetch("/api/onboarding/skills").then((res) => {
+      return res.json().then((data) => {
+        if (data.length > 0) {
+          //add a default option
+          const option = document.createElement("option");
+          option.value = "";
+          option.textContent = "Select skills";
+          skills_select.appendChild(option);
+          data.forEach((q) => {
+            const option = document.createElement("option");
+            option.value = q.value;
+            option.textContent = q.name;
+            skills_select.appendChild(option);
+          });
+        } else {
+          const option = document.createElement("option");
+          option.value = "";
+          option.textContent = "No skills";
+          skills_select.appendChild(option);
+        }
+      });
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      fetch("/api/onboarding/profile", {
+        method: "POST",
+        body: formData,
+      }).then((res) => {
+        res.json().then((data) => {
+          if (data.success) {
+            document
+              .querySelector(".profile_container")
+              .classList.add("slide-out");
+            setTimeout(() => {
+              window.location.href = "/onboarding/experience";
+            }, 500); // Adjust the timeout duration based on your animation duration
+          } else {
+            document.querySelector(".error").style.display = "block";
+            document.getElementById("error_message").textContent = data.message;
+          }
+        });
+      });
+    });
+  </script>
+</div>

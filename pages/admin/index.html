@@ -1,0 +1,71 @@
+<style>
+  .container {
+    max-width: 800px; /* Adjust the width based on your design */
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .top {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .users,
+  .jobs {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    margin-right: 10px;
+  }
+
+  .users i,
+  .jobs i {
+    margin-right: 5px;
+  }
+</style>
+
+<div class="container">
+  <div class="w3-row-padding top">
+    <div class="w3-col s12 users">
+      <h2><i class="fa fa-users"></i> Users</h2>
+    </div>
+    <div class="w3-col s12 jobs">
+      <h2><i class="fa fa-briefcase"></i> Jobs</h2>
+    </div>
+  </div>
+
+  <script>
+    fetch("/api/admin/users")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to fetch users: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        document.querySelector(
+          ".users"
+        ).innerHTML = `<h2><i class="fa fa-users"></i> ${data.length} Users</h2>`;
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+    fetch("/api/admin/jobs")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to fetch jobs: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        document.querySelector(
+          ".jobs"
+        ).innerHTML = `<h2><i class="fa fa-briefcase"></i> ${data.length} Jobs</h2>`;
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  </script>
+</div>

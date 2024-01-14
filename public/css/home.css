@@ -1,0 +1,88 @@
+@import url("https://www.w3schools.com/w3css/4/w3.css");
+
+
+.bar_container {
+    margin: auto;
+    margin-top: 10px;
+    background-color: rgba(192, 192, 192, 0.3);
+    /* Glassy grey color with transparency */
+    border: 1px solid #ccc;
+    align-items: center;
+    border-radius: 30px;
+    width: 80%;
+}
+
+.onboarding_progress {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.progress-point {
+    width: 40px;
+    /* Adjust the size of the progress point */
+    height: 40px;
+    /* Make it a circle */
+    background-color: #ddd;
+    /* Color for upcoming progress */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    /* Adjust the icon size */
+    animation: pulse 1s infinite;
+}
+
+.last {
+    background-color: #4caf50;
+    /* Green color for completed progress */
+    color: #fff;
+    /* Text color for completed progress */
+    animation: checkmark 1s ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes checkmark {
+
+    0%{
+        transform: scale(0.5) rotate(-360deg);
+    }
+   
+    50% {
+        transform: scale(1.2) rotate(360deg);
+    }
+
+         100% {
+             transform: scale(1) rotate(0deg);
+         }
+}
+
+.current {
+    background-color: #4caf50;
+    /* Green color for completed progress */
+    color: whitesmoke
+    /* Text color for current progress */
+}
+
+.next {
+    background-color: #ddd;
+    /* Color for upcoming progress */
+    color: #333;
+    /* Text color for upcoming progress */
+}
