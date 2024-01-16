@@ -808,18 +808,25 @@ class Table extends EventEmitter {
     this.emit("save");
     return true;
   }
+
   /**
    * Find and update a row in the database based on the given query and update.
    *
    * @param {object} query - The query object used to find the row.
    * @param {object} update - The update object used to update the row.
-   * @return {boolean} Returns true if a row was found and updated, false otherwise.
+   * @return {boolean|Array} Returns true if a row was found and updated, otherwise returns an array with an error message.
    */
   findAndUpdate(query, update) {
     const results = this.find(query);
 
     if (results.length > 0) {
-      //locate the data in the main array and update it
+      // Validate the update against the schema
+      const validation = this.validateRow(update);
+      if (validation !== true) {
+        return validation; // Return validation error
+      }
+
+      // Locate the data in the main array and update it
       for (let data of this.data) {
         if (data.id === results[0].id) {
           for (const key in update) {
@@ -835,16 +842,23 @@ class Table extends EventEmitter {
   }
 
   /**
-   * Updates a row in the database based on the given query and update object.
+   * Find and update a row in the database based on the given query and update.
    *
-   * @param {object} query - The query object used to find the row to update.
-   * @param {object} update - The object containing the updated values for the row.
-   * @return {boolean} Returns true if a row was found and updated, false otherwise.
+   * @param {object} query - The query object used to find the row.
+   * @param {object} update - The update object used to update the row.
+   * @return {boolean|Array} Returns true if a row was found and updated, otherwise returns an array with an error message.
    */
   findOneAndUpdate(query, update) {
     const results = this.find(query);
+
     if (results.length > 0) {
-      //locate the data in the main array and update it
+      // Validate the update against the schema
+      const validation = this.validateRow(update);
+      if (validation !== true) {
+        return validation; // Return validation error
+      }
+
+      // Locate the data in the main array and update it
       for (let data of this.data) {
         if (data.id === results[0].id) {
           for (const key in update) {
@@ -857,38 +871,156 @@ class Table extends EventEmitter {
     } else {
       return false;
     }
-    // Emit the 'save' event after updating a row
   }
 
   /**
    * Delete the first element in the data array that matches the given query.
    *
    * @param {type} query - the query to match against the elements in the data array
-   * @return {boolean} true if an element is deleted, otherwise false
+   * @return {boolean|Array} true if an element is deleted, otherwise false
    */
   findAndDelete(query) {
     const results = this.find(query);
+
     if (results.length > 0) {
+      // Validate the query against the schema
+      const validation = this.validateRow(results[0]);
+      if (validation !== true) {
+        return validation; // Return validation error
+      }
+
       for (const row of results) {
         this.data.splice(this.data.indexOf(row), 1);
       }
+      this.emit("save");
       return true;
     } else {
       return false;
     }
-    // Emit the 'save' event after deleting a row
   }
 
-  findOneAndDelete(query) {
+  /**
+   * Deletes rows from the data array that match the given query.
+   *
+   * @param {Object} query - The query object used to filter the rows.
+   * @return {boolean|Array} Returns true if any rows were deleted, otherwise returns an array with an error message.
+   */
+  delete(query) {
     const results = this.find(query);
+
     if (results.length > 0) {
-      const row = results[0];
-      this.data.splice(this.data.indexOf(row), 1);
+      // Validate each row against the schema
+      for (const row of results) {
+        const validation = this.validateRow(row);
+        if (validation !== true) {
+          return validation; // Return validation error
+        }
+      }
+
+      for (const row of results) {
+        this.data.splice(this.data.indexOf(row), 1);
+      }
+      this.emit("save");
       return true;
     } else {
       return false;
     }
-    // Emit the 'save' event after deleting a row
+  }
+
+  /**
+   * Find and delete a row in the database based on the given query.
+   *
+   * @param {Object} query - The query object used to find the row.
+   * @return {boolean|Array} Returns true if a row was found and deleted, otherwise returns an array with an error message.
+   */
+  findOneAndDelete(query) {
+    const results = this.find(query);
+
+    if (results.length > 0) {
+      // Validate the row against the schema
+      const validation = this.validateRow(results[0]);
+      if (validation !== true) {
+        return validation; // Return validation error
+      }
+
+      const row = results[0];
+      this.data.splice(this.data.indexOf(row), 1);
+      this.emit("save");
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Validates the given row against the table schema.
+   *
+   * @param {Object} row - The row to be validated.
+   * @returns {boolean|Array} - Returns true if the row is valid, otherwise returns an array with an error message.
+   */
+  validateRow(row) {
+    const schemaKeys = Object.keys(this.schema);
+    const rowKeys = Object.keys(row);
+
+    // Crosscheck schema and row keys, check if the key has a default value
+    for (const key of schemaKeys) {
+      if (
+        this.schema[key].required &&
+        !rowKeys.includes(key) &&
+        row[key] === undefined &&
+        this.schema[key].default === undefined
+      ) {
+        return [
+          `Column '${key}' is required but not provided in the inserted row.`,
+        ];
+      }
+    }
+
+    for (const key in this.schema) {
+      // Check if the key is required and not provided (unless it has a default)
+      if (
+        this.schema[key].required &&
+        !rowKeys.includes(key) &&
+        this.schema[key].default === undefined
+      ) {
+        return [
+          `Column '${key}' is required but not provided in the inserted row.`,
+        ];
+      }
+
+      // Check if the default value is defined in the schema
+      if (this.schema[key].default !== undefined && row[key] === undefined) {
+        row[key] = this.schema[key].default;
+      }
+
+      // Check if the type is defined in the schema
+      if (this.schema[key].type) {
+        const expectedType = this.schema[key].type;
+        const actualType = typeof row[key];
+
+        // Check if the actual type matches the expected type
+        if (actualType !== expectedType) {
+          return [
+            `Column '${key}' must be of type '${expectedType}', but got '${actualType}'.`,
+          ];
+        }
+      }
+
+      if (this.schema[key].unique) {
+        // Check uniqueness for columns marked as unique
+        const isUnique = !this.data.some(
+          (existingRow) => existingRow[key] === row[key]
+        );
+
+        if (!isUnique) {
+          return [
+            `Column '${key}' must be unique, but a duplicate value exists.`,
+          ];
+        }
+      }
+    }
+
+    return true;
   }
 
   /**

@@ -1,0 +1,523 @@
+<style>
+  body {
+    font-family: "Arial", sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0;
+  }
+
+  .containe {
+    max-width: 80%;
+    max-height: 800px;
+    margin: 20px auto;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: scroll;
+  }
+
+  .page_top {
+    background-color: #3b5998;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-family: "Roboto", sans-serif;
+    font-weight: bold;
+  }
+
+  .main_info {
+    display: flex;
+    flex-direction: column;
+
+    padding: 20px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .main_info button {
+    background-color: #3b5998;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .details_container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+
+  .img_container img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px; /* Added margin-bottom to center the image */
+  }
+
+  h1,
+  p {
+    margin: 5px 0;
+    color: #1c1e21;
+  }
+
+  .info_container {
+    margin: 10px 0;
+  }
+
+  .switch-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 24px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: #2196f3;
+  }
+
+  input:focus + .slider {
+    box-shadow: 0 0 1px #2196f3;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(26px);
+  }
+
+  button {
+    background-color: #3b5998;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #324b81;
+  }
+
+  .switch_container {
+    margin-top: 10px;
+    background-color: #f0f2f5;
+    width: 200px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+    font-size: 18px;
+    border-radius: 5px;
+  }
+
+  .save-container {
+    position: fixed;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    width: 80%;
+    margin-left: 10%;
+    border-radius: 10px 10px 0 0;
+    background-color: #fff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    display: none; /* Initially hide the container */
+  }
+
+  .save {
+    text-align: center;
+  }
+
+  .save button {
+    background-color: #3b5998;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .save button:hover {
+    background-color: #324b81;
+  }
+
+  .info_container {
+    display: flex;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+
+  .info_container label {
+    margin-right: 10px;
+  }
+
+  .info_container p {
+    margin: 0;
+    margin-right: 10px;
+    color: #1c1e21;
+  }
+
+  .info_container a {
+    color: #1c1e21;
+    text-decoration: none;
+    margin-right: 10px;
+  }
+
+  .experience {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+    margin-top: 20px;
+  }
+</style>
+
+<div class="containe w3-container">
+  <div class="page_top w3-container" id="top">
+    <h1>User Details</h1>
+  </div>
+  <div class="content w3-container">
+    <div class="main_info r w3-card-4">
+      <div class="img_container">
+        <img src="" alt="" class="profile-image" />
+      </div>
+      <div class="details_container">
+        <h1 id="name">Name</h1>
+        <p id="username">Username</p>
+        <p id="gender">Gender</p>
+
+        <p id="email">Email</p>
+
+        <p id="phone">Phone</p>
+        <button onclick="editUser()">
+          <i class="fa-solid fa-pen-to-square"></i> Edit
+        </button>
+      </div>
+    </div>
+    <div class="w3-row">
+      <div class="side_info w3-col s6">
+        <div class="switch-container">
+          <div class="switch_container">
+            <label for="isVerified" class="label">Is Verified:</label>
+            <label class="switch">
+              <input type="checkbox" id="isVerified" onchange="setChanges()" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="switch_container">
+            <label for="isAdmin" class="label">Is Admin:</label>
+            <label class="switch">
+              <input type="checkbox" id="isAdmin" onchange="setChanges()" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="switch_container">
+            <label for="isBanned" class="label">Is Banned:</label>
+            <label class="switch">
+              <input type="checkbox" id="isBanned" onchange="setChanges()" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="switch_container">
+            <label for="isBanned" class="label">Is Premium:</label>
+            <label class="switch">
+              <input type="checkbox" id="isPremium" onchange="setChanges()" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="info w3-col s6">
+        <div class="info_container" style="display: flex; align-items: center">
+          <label for="joined_at" style="margin-right: 10px"> Joined At: </label>
+          <p id="joined_at">Joined At</p>
+        </div>
+        <div class="info_container">
+          <label for="age">Age: </label>
+          <p id="age">Age</p>
+        </div>
+        <div class="info_container">
+          <label for="location">Location: </label>
+          <p id="location">Location</p>
+        </div>
+        <div class="info_container">
+          <label for="qualification">Qualification: </label>
+          <p id="qualification">Qualification</p>
+        </div>
+        <div class="info_container">
+          <label for="skills">Skills: </label>
+          <p id="skills">Skills</p>
+        </div>
+        <div class="info_container">
+          <label for="university">University: </label>
+          <p id="university">University</p>
+        </div>
+        <div class="info_container">
+          <label for="working_years">Working Years: </label>
+          <p id="working_years">Working Years</p>
+        </div>
+        <div class="info_container">
+          <a href="" id="cv_link">Download CV</a>
+          <i class="fa fa-download"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="experience w3-container">
+    <div id="experience"></div>
+  </div>
+</div>
+<div class="save-container">
+  <div class="save">
+    <p>Uh ho! You have unsaved changes</p>
+    <button class="w3-button w3-black w3-hover-purple save-btn" id="save-btn">
+      Save
+    </button>
+  </div>
+</div>
+<script>
+  const id = window.location.pathname.split("/").pop();
+  const checkboxes = document.querySelectorAll("input[type=checkbox]");
+
+  checkboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", () => {
+      checkbox.textContent = checkbox.checked ? "Yes" : "No";
+      checkbox.setAttribute("data-changed", checkbox.checked);
+    });
+  });
+
+  let userData; // Variable to store the original user data
+  let changesMade = false; // Flag to track unsaved changes
+
+  function editUser() {
+    modal("input", "Edit User", "Change user details", {
+      inputs: [
+        {
+          type: "text",
+          name: "name",
+          label: "Name",
+          value: userData.name,
+        },
+        {
+          type: "text",
+          name: "username",
+          label: "Username",
+          value: userData.username,
+        },
+        {
+          type: "email",
+          name: "email",
+          label: "Email",
+          value: userData.email,
+        },
+        {
+          type: "text",
+          name: "phone",
+          label: "Phone",
+          value: userData.phone,
+        },
+        {
+          type: "text",
+          name: "gender",
+          label: "Gender",
+          value: userData.age,
+        },
+      ],
+    }).then((result) => {
+      if (result) {
+        if (update(result)) {
+          changesMade = true;
+          userData.name = result.name;
+          userData.username = result.username;
+          userData.email = result.email;
+          userData.phone = result.phone;
+          userData.gender = result.gender;
+          userData.age = result.age;
+          updateInputFields();
+        }
+      }
+    });
+  }
+
+  // Function to update the input fields with user data
+  function updateInputFields() {
+    document.querySelector(".profile-image").src = "/" + userData.profile_image;
+    document.getElementById("name").textContent = userData.name;
+    document.getElementById("username").textContent = userData.username;
+    document.getElementById("gender").textContent = userData.gender
+      ? userData.gender
+      : "Not specified";
+    document.getElementById("email").textContent = userData.email;
+    document.getElementById("phone").textContent = userData.phone
+      ? userData.phone
+      : "Not specified";
+    document.getElementById("joined_at").textContent = new Date(
+      userData.created_at
+    ).toLocaleDateString();
+    document.getElementById("isVerified").checked = userData.is_verified;
+    document.getElementById("isAdmin").checked = userData.is_admin;
+    document.getElementById("isBanned").checked = userData.is_banned;
+    document.getElementById("isPremium").checked = userData.is_premium;
+    document.getElementById(
+      "age"
+    ).innerHTML = `<input type="number" id="age_input" class="w3-input" value="${
+      userData.age ? userData.age : ""
+    }" oninput="setChanges('age', this.value)" />`;
+    document.getElementById("location").innerHTML = `
+      <input type="text" id="location_input" class="w3-input" value="${
+        userData.location ? userData.location : ""
+      }" oninput="setChanges('location', this.value)" />
+    `;
+    document.getElementById("qualification").innerHTML = `
+      <input type="text" id="qualification_input" class="w3-input" value="${
+        userData.qualification ? userData.qualification : ""
+      }" oninput="setChanges('qualification', this.value)" />
+    `;
+    document.getElementById("skills").innerHTML = `
+      <input type="text" id="skills_input" class="w3-input" value="${
+        userData.skills ? userData.skills : ""
+      }" oninput="setChanges('skills', this.value)" />
+    `;
+    document.getElementById("university").innerHTML = `
+      <input type="text" id="university_input" class="w3-input" value="${
+        userData.university ? userData.university : ""
+      }" oninput="setChanges('university', this.value)" />
+    `;
+    document.getElementById("working_years").innerHTML = `
+      <input type="number" id="working_years_input" class="w3-input" value="${
+        userData.working_years ? userData.working_years : ""
+      }" oninput="setChanges('working_years', this.value)" />
+    `;
+
+    const experienceContainer = document.getElementById("experience");
+    experienceContainer.innerHTML = "<h3>Work Experience</h3>";
+
+    if (!userData.experience || userData.experience.length === 0) {
+      experienceContainer.innerHTML = "<p>No work experience found</p>";
+    }
+
+    userData.experience.forEach((exp, index) => {
+      const expDiv = document.createElement("div");
+      expDiv.innerHTML = `
+        <p><strong>Company:</strong> ${exp.company}</p>
+        <p><strong>Start Date:</strong> ${exp.startDate}</p>
+        <p><strong>End Date:</strong> ${exp.endDate}</p>
+        <p><strong>Position:</strong> ${exp.position}</p>
+        <p><strong>Currently Working:</strong> ${
+          exp.currentlyWorking ? "Yes" : "No"
+        }</p>
+        <br>`;
+      experienceContainer.appendChild(expDiv);
+    });
+
+    document.getElementById("cv_link").href = "/" + userData.cv;
+  }
+  // Function to set changesMade flag to true
+  function setChanges() {
+    changesMade = true;
+    document.querySelector(".save-container").style.display = "block";
+  }
+
+  // Fetch user data
+  fetch(`/api/admin/user/${id}`).then((res) => {
+    res.json().then((data) => {
+      if (data.success) {
+        userData = data.user;
+        updateInputFields();
+      } else {
+        error(data.message);
+      }
+    });
+  });
+
+  // Save button click event
+  document.getElementById("save-btn").addEventListener("click", () => {
+    console.log(document.getElementById("isPremium"));
+    // Gather updated data
+    let updatedData = {
+      age: document.getElementById("age_input").value,
+      location: document.getElementById("location_input").value,
+      qualification: document.getElementById("qualification_input").value,
+      skills: document.getElementById("skills_input").value,
+      university: document.getElementById("university_input").value,
+      working_years: document.getElementById("working_years_input").value,
+      is_admin: document.getElementById("isAdmin").checked,
+      is_banned: document.getElementById("isBanned").checked,
+      is_verified: document.getElementById("isVerified").checked,
+      is_premium: document.getElementById("isPremium").checked,
+    };
+
+    // Make a PATCH request to update the user data
+    update(updatedData);
+    changesMade = false;
+    document.querySelector(".save-container").style.display = "none";
+  });
+
+  function update(updatedData) {
+    fetch(`/api/admin/user/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          message(data.message, "top");
+          return true;
+        } else {
+          // Handle error
+          error(data.message, "top", 3000);
+          return false;
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+</script>

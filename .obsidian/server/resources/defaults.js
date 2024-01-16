@@ -123,7 +123,9 @@ function modal(type, title, content, options) {
 
       submitButton.onclick = () => {
         options.inputs.forEach((input) => {
-          inputValues[input.name] = document.getElementById(input.name).value;
+          inputValues[input.name] = document.querySelector(
+            `input#${input.name}, textarea#${input.name}`
+          ).value;
         });
         closeModal(inputValues);
       };

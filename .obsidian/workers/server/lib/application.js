@@ -1,4 +1,5 @@
 const { Config } = require("../../config");
+const RouteHandler = require("./router/RouteHandler");
 const { Request } = require("./router/request");
 const { Response } = require("./router/response");
 const { Router } = require("./router/router");
@@ -76,19 +77,17 @@ class App extends EventEmitter {
    * Adds a GET route to the server.
    *
    * @param {string} path - The path of the route.
-   * @param {function} handler - The handler function for the route.
-   * @param {Request} handler.req - The request object.
-   * @param {Response} handler.res - The response object.
+   * @param {RouteHandler} handler - The handler function for the route.
    * @access public
    * @return {undefined} This function does not return anything.
    *
    */
-  get(path, handler, next = null) {
-    this.server.addRoute(path, "GET", handler, next);
+  get(path, ...handlers) {
+    this.server.addRoute(path, "GET", handlers[0]);
   }
 
-  put(path, handler) {
-    this.server.addRoute(path, "PUT", handler);
+  put(path, ...handlers) {
+    this.server.addRoute(path, "PUT", handlers[0]);
   }
 
   delete(path, handler) {

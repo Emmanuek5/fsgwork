@@ -1,96 +1,124 @@
+const { RouteHandler } = require("./RouteHandler");
 const { Request } = require("./request");
 const { Response } = require("./response");
 
-// components/router.js
+/**
+ * Class representing a router for handling HTTP requests.
+ */
 class Router {
+  /**
+   * Creates a new instance of the Router class.
+   */
   constructor() {
+    /**
+     * Object to store routes.
+     * @type {Object.<string, Object.<string, RouteHandler[]>>}
+     */
     this.routes = {};
+
+    /**
+     * Base path for routes.
+     * @type {string}
+     */
     this.basePath = "";
   }
 
-  addRoute(path, method, handler) {
+  /**
+   * Adds a new route for handling HTTP requests.
+   *
+   * @param {string} method - The HTTP method for the route.
+   * @param {string} path - The URL path of the route.
+   * @param {function(Request, Response)[]} handlers - The handler functions for the route.
+   * @returns {void}
+   * @private
+   */
+  addRoute(method, path, ...handlers) {
     // Initialize this.routes[path] as an empty object if it doesn't exist
     if (!this.routes[path]) {
       this.routes[path] = {};
     }
-    this.routes[path][method] = handler;
+
+    // Convert single handler to an array
+    const handlerArray = Array.isArray(handlers) ? handlers : [handlers];
+
+    this.routes[path][method] = handlerArray;
   }
 
   /**
-   * Add a new route for handling GET requests.
+   * Adds a new route for handling GET requests.
    *
    * @param {string} path - The URL path of the route.
-   * @param {function} handler - The function that handles the request.
-   * @param {Request} handler.req - The request object.
-   * @param {Response} handler.res - The response object.
-   * @access public
-   * @return {undefined} This function does not return anything.
+   * @param {...function(Request, Response)} handlers - The handler functions for the route.
+   * @returns {void}
    */
-  get(path, handler) {
-    this.addRoute(path, "GET", handler);
+  get(path, ...handlers) {
+    this.addRoute("GET", path, ...handlers);
   }
 
   /**
    * Adds a new route for handling POST requests.
    *
    * @param {string} path - The path of the route.
-   * @param {function} handler - The handler function for the route.
+   * @param {...function(Request, Response)} handlers - The handler functions for the route.
+   * @returns {void}
    */
-  post(path, handler) {
-    this.addRoute(path, "POST", handler);
+  post(path, ...handlers) {
+    this.addRoute("POST", path, ...handlers);
   }
 
   /**
-   * Add a new route for handling PUT requests.
+   * Adds a new route for handling PUT requests.
    *
-   * @param {string} path - the path of the route
-   * @param {function} handler - the handler function for the route
-   * @return {undefined}
+   * @param {string} path - The path of the route.
+   * @param {...function(Request, Response)} handlers - The handler functions for the route.
+   * @returns {void}
    */
-  put(path, handler) {
-    this.addRoute(path, "PUT", handler);
+  put(path, ...handlers) {
+    this.addRoute("PUT", path, ...handlers);
   }
 
   /**
-   * Deletes
+   * Adds a new route for handling DELETE requests.
    *
-   * @param {string} path - The path of the route to be deleted.
-   * @param {function} handler - The handler function to be executed when the route is deleted.
-   * @return {undefined} - This function does not return a value.
+   * @param {string} path - The path of the route.
+   * @param {...function(Request, Response)} handlers - The handler functions for the route.
+   * @returns {void}
    */
-  delete(path, handler) {
-    this.addRoute(path, "DELETE", handler);
+  delete(path, ...handlers) {
+    this.addRoute("DELETE", path, ...handlers);
   }
 
-  /*
+  /**
    * Patches a route with the specified path and handler.
    *
    * @param {string} path - The path of the route to patch.
-   * @param {function} handler - The handler function to be executed when the route is called.
+   * @param {...function(Request, Response)} handlers - The handler functions for the route.
+   * @returns {void}
    */
-  patch(path, handler) {
-    this.addRoute(path, "PATCH", handler);
+  patch(path, ...handlers) {
+    this.addRoute("PATCH", path, ...handlers);
   }
 
   /**
    * Adds a route for the HEAD HTTP method.
    *
    * @param {string} path - The path of the route.
-   * @param {function} handler - The handler function to be executed for the route.
+   * @param {...function(Request, Response)} handlers - The handler functions for the route.
+   * @returns {void}
    */
-  head(path, handler) {
-    this.addRoute(path, "HEAD", handler);
+  head(path, ...handlers) {
+    this.addRoute("HEAD", path, ...handlers);
   }
 
   /**
    * Updates the specified path with the provided handler.
    *
    * @param {string} path - The path to update.
-   * @param {function} handler - The handler function to associate with the path.
-   * @return {undefined} - This function does not return a value.
+   * @param {...function(Request, Response)} handlers - The handler functions for the route.
+   * @returns {void}
    */
-  update(path, handler) {
-    this.addRoute(path, "UPDATE", handler);
+  update(path, ...handlers) {
+    this.addRoute("UPDATE", path, ...handlers);
   }
 }
 

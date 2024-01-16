@@ -15,6 +15,10 @@
     border-radius: 8px;
   }
 
+  .w3-container {
+    display: inline-block;
+    margin-right: 10px;
+  }
   .top {
     text-align: center;
     margin-bottom: 20px;
@@ -61,6 +65,24 @@
     background-color: #45a049;
   }
 
+  select,
+  input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  input:hover {
+    border-color: #888;
+  }
+
+  .fa-search {
+    position: relative;
+    left: -28px;
+    top: 6px;
+    color: #888;
+    cursor: pointer;
+  }
   .bottom_bar {
     text-align: center;
     margin-top: 20px;
@@ -89,13 +111,20 @@
     background-color: #45a049;
   }
 </style>
-<div class="w3-container container">
+<div class="container">
   <div class="top">
     <h1>All Jobs</h1>
-    <select name="filter" id="">
-      <option value="asc">Latest</option>
-      <option value="desc">Oldest</option>
-    </select>
+    <div class="w3-container">
+      <div class="w3-container">
+        <input type="text" name="search" id="search" placeholder="Search" />
+        <i class="fa fa-search" aria-hidden="true"></i>
+      </div>
+      <label for="filter">Order by:</label>
+      <select name="filter" id="filter">
+        <option value="asc">Latest</option>
+        <option value="desc">Oldest</option>
+      </select>
+    </div>
   </div>
   <table class="w3-table">
     <tr>
@@ -104,6 +133,7 @@
       <th>Location</th>
       <th>Salary</th>
     </tr>
+    <div class="table"></div>
   </table>
   <div class="bottom_bar">
     <div class="pagination-wheel"></div>
@@ -111,13 +141,20 @@
   </div>
   <script>
     const filter = document.querySelector("select");
+    const searchInput = document.querySelector("input");
 
     let order = "asc";
     let page = 1;
+    let search = "";
 
     filter.addEventListener("change", (event) => {
       order = event.target.value;
-      getJobs(order, page);
+      getJobs(order, page, search);
+    });
+
+    searchInput.addEventListener("input", (event) => {
+      search = event.target.value;
+      getJobs(order, page, search);
     });
 
     fetch("/api/job/pagenumber?limit=10").then((res) => {
@@ -188,8 +225,16 @@
       });
     });
 
-    function getJobs(order, page) {
-      fetch("/api/job/jobs?order=" + order + "&limit=10" + "&page=" + page)
+    function getJobs(order, page, search) {
+      fetch(
+        "/api/job/jobs?order=" +
+          order +
+          "&limit=10" +
+          "&page=" +
+          page +
+          "&q=" +
+          search
+      )
         .then((res) => {
           if (!res.ok) {
             throw new Error(`Failed to fetch jobs: ${res.status}`);
@@ -199,6 +244,27 @@
         .then((data) => {
           const table = document.querySelector("table");
           table.innerHTML = "";
+          //add the table header
+          const tableHeader = document.createElement("tr");
+          tableHeader.innerHTML = `
+            <th>Title</th>
+            <th>Description</th>
+            <th>Location</th>
+            <th>Salary</th>
+            <th>Edit</th>
+            <th>Delete</th>
+          `;
+          table.appendChild(tableHeader);
+
+          if (data.length === 0) {
+            const tr = document.createElement("tr");
+            const td = document.createElement("td");
+            td.colSpan = 4;
+            td.textContent = "No jobs found";
+            tr.appendChild(td);
+            table.appendChild(tr);
+          }
+
           data.forEach((job) => {
             const row = document.createElement("tr");
             row.innerHTML = `
@@ -265,7 +331,7 @@
             if (!res.ok) {
               throw new Error(`Failed to edit job: ${res.status}`);
             } else {
-              getJobs(order, page);
+              getJobs(order, page, search);
               message("Job edited successfully", "top", "right", 4000);
             }
           });
@@ -282,6 +348,6 @@
       );
     }
 
-    getJobs(order, page);
+    getJobs(order, page, search);
   </script>
 </div>

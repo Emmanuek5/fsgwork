@@ -166,11 +166,56 @@
     padding: 1rem;
     /* Adjust padding as needed */
     padding-right: 2.5rem;
-    color: white;
+    color: white !important;
     border-radius: 4px;
     z-index: 2000;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     white-space: nowrap;
+}
+
+.error-container.top {
+    top: 1rem;
+    /* Spacing from the top */
+    left: 50%;
+    /* Center horizontally */
+    transform: translateX(-50%);
+    /* Center vertically */
+    animation: slideInFromTop 0.4s forwards;
+    /* Slide in animation */
+}
+
+.error-container.top.left {
+    top: 1rem;
+    /* Spacing from the top */
+    left: 1rem;
+    /* Spacing from the left */
+    transform: translateX(-100%);
+    /* Start offscreen */
+    transition: opacity 0.5s, transform 0.5s;
+    /* Consistent with JavaScript timeouts */
+    /* Slide in animation */
+}
+
+.error-container.top.right {
+    top: 1rem;
+    /* Spacing from the top */
+    right: 1rem;
+    /* Spacing from the right */
+    transform: translateX(100%);
+    /* Start offscreen */
+    animation: slideInFromRight 0.4s forwards;
+    /* Slide in animation */
+}
+
+.error-container.bottom {
+    bottom: 1rem;
+    /* Spacing from the bottom */
+    left: 50%;
+    /* Center horizontally */
+    transform: translateX(-50%);
+    /* Center vertically */
+    animation: slideInFromBottom 0.4s forwards;
+    /* Slide in animation */
 }
 
 .error-container.bottom.left {

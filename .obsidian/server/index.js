@@ -153,25 +153,34 @@ function processSubFolder(subFolderPath, parentFolderKey, mainFolderPath) {
   const subFolderKey = subFolderName.includes("[")
     ? subFolderName.slice(1, -1)
     : subFolderName;
-
   fs.readdirSync(subFolderPath).forEach((subFile) => {
     const subFilePath = path.join(subFolderPath, subFile);
     if (subFile.endsWith(".html")) {
       const subFileName = subFile.slice(0, -5); // Remove ".html" extension
       const isIndex = subFileName === "index";
       let folderKey = parentFolderKey + "/" + subFolderKey;
-      const route = isIndex
-        ? `/${folderKey}` // Register index file as /
-        : subFileName.startsWith("[") &&
-          subFileName.endsWith("]") &&
-          folderKey.startsWith("[") &&
-          folderKey.endsWith("]")
-        ? `/:${folderKey}/:${subFileName.slice(1, -1)}`
-        : subFileName.startsWith("[") && subFileName.endsWith("]")
-        ? `/${folderKey}/${subFileName.slice(1, -1)}`
-        : folderKey.startsWith("[") && folderKey.endsWith("]")
-        ? `/:${folderKey}${isIndex ? "" : "/"}${subFileName}`
-        : `/${folderKey}${isIndex ? "" : "/"}${subFileName}`;
+
+      let route;
+
+      if (
+        subFileName.startsWith("[") &&
+        subFileName.endsWith("]") &&
+        !subFileName.slice(1, -1).includes("[") &&
+        !subFileName.slice(1, -1).includes("]")
+      ) {
+        // Treat as a single parameter route
+        const paramKey = subFileName.slice(1, -1);
+        route = isIndex ? `/${folderKey}` : `/${folderKey}/:${paramKey}`;
+      } else {
+        // Normal route handling
+        route = isIndex
+          ? `/${folderKey}`
+          : folderKey.startsWith("[") && folderKey.endsWith("]")
+          ? `/:${folderKey}/:${subFileName}`
+          : folderKey.startsWith("[") && folderKey.endsWith("]")
+          ? `/${folderKey}/${subFileName}/:${subFileName.slice(1, -1)}`
+          : `/${folderKey}${isIndex ? "" : "/"}${subFileName}`;
+      }
 
       registerRoute(route, parentFolderKey + "/" + subFolderKey, subFileName);
     } else if (fs.lstatSync(subFilePath).isDirectory()) {

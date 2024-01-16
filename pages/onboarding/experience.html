@@ -175,6 +175,10 @@
     <div class="content">
       <form id="workExperienceForm">
         <div class="input_container">
+          <label for="university">University</label>
+          <input type="text" id="university" required />
+        </div>
+        <div class="input_container">
           <label for="years"> How many years Have you been working?</label>
           <input type="number" id="years" required />
         </div>
@@ -218,6 +222,7 @@
 
     // Convert experiences array to JSON
     const experiencesJSON = JSON.stringify({
+      university: document.getElementById("university").value,
       years: document.getElementById("years").value,
       experiences: experiences,
     });

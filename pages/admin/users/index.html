@@ -1,13 +1,287 @@
+<style>
+  body {
+    font-family: "Roboto", sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+  }
+
+  .main_container {
+    max-width: 80%;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+
+  .top {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .top h1 {
+    font-weight: bolder;
+    font-size: 2em;
+    color: #333;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+
+  th,
+  td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f5f5f5;
+  }
+
+  .w3-container {
+    display: inline-block;
+    margin-right: 10px;
+  }
+
+  select,
+  input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  input:hover {
+    border-color: #888;
+  }
+
+  .fa-search {
+    position: relative;
+    left: -28px;
+    top: 6px;
+    color: #888;
+    cursor: pointer;
+  }
+
+  .bottom_bar {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .pagination-wheel {
+    display: inline-block;
+  }
+
+  .pagination-buttons {
+    display: inline-block;
+    margin-left: 20px;
+  }
+
+  .pagination-buttons button {
+    padding: 8px 12px;
+    margin: 2px;
+    cursor: pointer;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
+
+  .pagination-buttons button:hover {
+    background-color: #45a049;
+  }
+</style>
+
 <div class="main_container">
   <div class="top">
     <h1>All Users</h1>
+    <div class="w3-container">
+      <label for="filter">Order by:</label>
+      <select name="filter" id="filter">
+        <option value="asc">Latest</option>
+        <option value="desc">Oldest</option>
+      </select>
+    </div>
+    <div class="w3-container">
+      <input type="text" name="search" id="search" placeholder="Search" />
+      <i class="fa fa-search" aria-hidden="true"></i>
+    </div>
   </div>
   <div class="content">
     <table>
       <tr>
         <th>Name</th>
-        <th>Email</th>
-        <th></th>
+        <th>Joined at</th>
+        <th>Premium?</th>
+        <th>Admin?</th>
       </tr>
+    </table>
+    <div class="bottom_bar">
+      <div class="pagination-wheel"></div>
+      <div class="pagination-buttons"></div>
+    </div>
   </div>
+  <script>
+    let order = "asc";
+    let page = 1;
+    let search = "";
+
+    fetch("/api/admin/users/pagenumber?limit=10").then((res) => {
+      res.json().then((data) => {
+        const wheel = document.querySelector(".pagination-wheel");
+        const buttonsContainer = document.querySelector(".pagination-buttons");
+
+        const previousButton = document.createElement("button");
+        previousButton.innerHTML = "<i class='fas fa-chevron-left'></i>";
+        previousButton.addEventListener("click", () => {
+          if (page > 1) {
+            page--;
+            getJobs(order, page);
+          }
+        });
+        buttonsContainer.appendChild(previousButton);
+
+        const maxButtonsToShow = 10; // Adjust as needed
+        if (data <= maxButtonsToShow) {
+          for (let i = 1; i <= data; i++) {
+            const button = document.createElement("button");
+            button.innerText = i;
+            button.addEventListener("click", () => {
+              page = i;
+              getJobs(order, page);
+            });
+            buttonsContainer.appendChild(button);
+          }
+        } else {
+          const startPage = Math.max(
+            1,
+            page - Math.floor(maxButtonsToShow / 2)
+          );
+          const endPage = Math.min(data, startPage + maxButtonsToShow - 1);
+
+          if (startPage > 1) {
+            const ellipsisStart = document.createElement("span");
+            ellipsisStart.innerText = "...";
+            buttonsContainer.appendChild(ellipsisStart);
+          }
+
+          for (let i = startPage; i <= endPage; i++) {
+            const button = document.createElement("button");
+            button.innerText = i;
+            button.addEventListener("click", () => {
+              page = i;
+              getJobs(order, page);
+            });
+            buttonsContainer.appendChild(button);
+          }
+
+          if (endPage < data) {
+            const ellipsisEnd = document.createElement("span");
+            ellipsisEnd.innerText = "...";
+            buttonsContainer.appendChild(ellipsisEnd);
+          }
+        }
+
+        const nextButton = document.createElement("button");
+        nextButton.innerHTML = "<i class='fas fa-chevron-right'></i>";
+        nextButton.addEventListener("click", () => {
+          if (page < data) {
+            page++;
+            getJobs(order, page);
+          }
+        });
+        buttonsContainer.appendChild(nextButton);
+      });
+    });
+    function loadUsers(order, page, search) {
+      fetch(
+        "/api/admin/users?order=" +
+          order +
+          "&limit=10&page=" +
+          page +
+          "&q=" +
+          search
+      ).then((res) => {
+        res.json().then((data) => {
+          const table = document.querySelector("table");
+          table.innerHTML = "";
+          //add the table header
+          const tr = document.createElement("tr");
+          const thName = document.createElement("th");
+          thName.textContent = "Name";
+          const thJoined = document.createElement("th");
+          thJoined.textContent = "Joined at";
+          const thPremium = document.createElement("th");
+          thPremium.textContent = "Premium?";
+          const thAdmin = document.createElement("th");
+          thAdmin.textContent = "Admin?";
+          tr.appendChild(thName);
+          tr.appendChild(thJoined);
+          tr.appendChild(thPremium);
+          tr.appendChild(thAdmin);
+          table.appendChild(tr);
+
+          if (data.result.length === 0) {
+            const tr = document.createElement("tr");
+            const td = document.createElement("td");
+            td.colSpan = 4;
+            td.textContent = "No users found";
+            tr.appendChild(td);
+            table.appendChild(tr);
+          }
+          data.result.forEach((user) => {
+            const tr = document.createElement("tr");
+
+            // Name
+            const tdName = document.createElement("td");
+            const a = document.createElement("a");
+            a.href = "/admin/user/" + user.id;
+            a.textContent = user.name;
+            tdName.appendChild(a);
+            tr.appendChild(tdName);
+
+            // Joined at
+            const tdJoined = document.createElement("td");
+            const joinedDate = new Date(user.created_at);
+            tdJoined.textContent = joinedDate.toDateString();
+            tr.appendChild(tdJoined);
+
+            // Premium
+            const tdPremium = document.createElement("td");
+            tdPremium.textContent = user.is_premium ? "Yes" : "No";
+            tr.appendChild(tdPremium);
+
+            // Admin
+            const tdAdmin = document.createElement("td");
+            tdAdmin.textContent = user.is_admin ? "Yes" : "No";
+            tr.appendChild(tdAdmin);
+
+            // Additional columns can be added based on your requirements
+
+            // Append the row to the table
+            table.appendChild(tr);
+          });
+        });
+      });
+    }
+
+    const filter = document.getElementById("filter");
+    const searchInput = document.getElementById("search");
+
+    filter.addEventListener("change", (event) => {
+      order = event.target.value;
+      loadUsers(order, page, search);
+    });
+
+    searchInput.addEventListener("input", (event) => {
+      search = event.target.value;
+      loadUsers(order, page, search);
+    });
+
+    loadUsers(order, page, search);
+  </script>
 </div>

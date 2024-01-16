@@ -190,21 +190,22 @@ class Server extends event.EventEmitter {
     // Parse query parameters from the request URL
     const queryParameters = this.parseQueryParameters(request);
     request.params = queryParameters;
+
     // Find the route handler based on path and method
-    const routeHandler = this.findRouteHandler(path, method);
+    const routeHandlers = this.findRouteHandler(path, method); // Fix the function name here
 
-    if (routeHandler) {
-      // If a route handler is found, execute it and pass queryParameters
-      /**
-       * @param {Request} request - The request object.
-       * @param {Response} response - The response object.
-       * @param {Object} queryParameters - The parsed query parameters.
-       * @returns {undefined} This function does not return anything.
-       */
+    if (routeHandlers) {
+      // If route handlers are found, execute them and pass queryParameters
+      const executeHandler = (handlerIndex) => {
+        if (handlerIndex < routeHandlers.length) {
+          // Call the next handler in the chain
+          routeHandlers[handlerIndex](request, response, () => {
+            executeHandler(handlerIndex + 1);
+          });
+        }
+      };
 
-      // Parse the body for POST requests
-
-      routeHandler(request, response);
+      executeHandler(0);
 
       // Calculate the time taken to process the request in milliseconds
       const endTime = new Date();
@@ -218,6 +219,7 @@ class Server extends event.EventEmitter {
         ` ${ip} ${request.method} ${request.path} ${response.statusCode}  ${elapsedTime}ms`
       );
     } else {
+      // Handle the case where no route handlers are found
       const endTime = new Date();
       const elapsedTime = endTime - startTime;
       const ip = request.ip
@@ -354,13 +356,19 @@ class Server extends event.EventEmitter {
    * @param {string} method - The HTTP method of the route.
    * @param {function} handler - The handler function for the route.
    */
-  addRoute(path, method, handler) {
+  addRoute(path, method, handlers) {
     if (!this.routes[path]) {
       this.routes[path] = {};
     }
-    this.routes[path][method] = handler;
-  }
 
+    if (!this.routes[path][method]) {
+      this.routes[path][method] = [];
+    }
+
+    // Ensure handlers is an array
+    const handlersArray = Array.isArray(handlers) ? handlers : [handlers];
+    this.routes[path][method] = this.routes[path][method].concat(handlersArray);
+  }
   /**
    * Find the route handler based on the given path and method.
    *
