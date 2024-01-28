@@ -1,0 +1,367 @@
+<style>
+  body {
+    font-family: "Arial", sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 80%;
+    margin: 20px auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+
+  .top {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .top h1 {
+    font-weight: bolder;
+    font-size: 2em;
+    color: #333;
+    margin: 0;
+  }
+
+  .top .w3-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px; /* Adjust margin as needed */
+  }
+
+  #search {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+  }
+
+  #filter {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+
+  th,
+  td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+
+  th {
+    background-color: #4caf50;
+    color: #fff;
+  }
+
+  tr:hover {
+    background-color: #f5f5f5;
+  }
+
+  button {
+    padding: 8px 12px;
+    margin: 2px;
+    cursor: pointer;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
+
+  button:hover {
+    background-color: #45a049;
+  }
+
+  .deny-button {
+    background-color: #f44336;
+  }
+
+  .deny-button:hover {
+    background-color: #d32f2f;
+  }
+
+  .pagination-wheel,
+  .pagination-buttons {
+    margin-top: 20px;
+  }
+
+  .pagination-buttons button {
+    padding: 8px 12px;
+    margin: 2px;
+    cursor: pointer;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
+
+  .pagination-buttons button:hover {
+    background-color: #45a049;
+  }
+
+  .bottom_bar {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+
+<div class="container w3-card-4 w3-padding">
+  <div class="top">
+    <h1>Applications</h1>
+    <div class="w3-container">
+      <div class="w3-container">
+        <input type="text" name="search" id="search" placeholder="Search" />
+        <i class="fa fa-search" aria-hidden="true"></i>
+      </div>
+      <label for="filter">Order by:</label>
+      <select name="filter" id="filter">
+        <option value="asc">Latest</option>
+        <option value="desc">Oldest</option>
+      </select>
+    </div>
+  </div>
+  <div id="applicationsTable">
+    <table>
+      <tr>
+        <th>Job Title</th>
+        <th>User name</th>
+        <th>Status</th>
+        <th>Approve</th>
+        <th>Deny</th>
+      </tr>
+    </table>
+  </div>
+  <div class="bottom_bar">
+    <div class="pagination-wheel"></div>
+    <div class="pagination-buttons"></div>
+  </div>
+  <script>
+    let page = 1;
+    let order = "asc";
+    let q = "";
+    const filter = document.querySelector("#filter");
+    const search = document.querySelector("#search");
+
+    filter.addEventListener("change", () => {
+      order = filter.value;
+      loadApplications(page, order);
+    });
+
+    search.addEventListener("input", () => {
+      q = search.value;
+      loadApplications(page, order, q.trim());
+    });
+
+    fetch("/api/applications/pagenumber").then((res) => {
+      res.json().then((data) => {
+        const wheel = document.querySelector(".pagination-wheel");
+        const buttonsContainer = document.querySelector(".pagination-buttons");
+
+        const previousButton = document.createElement("button");
+        previousButton.innerHTML = "<i class='fas fa-chevron-left'></i>";
+        previousButton.addEventListener("click", () => {
+          if (page > 1) {
+            page--;
+            loadApplications(page, order);
+          }
+        });
+        buttonsContainer.appendChild(previousButton);
+
+        const maxButtonsToShow = 10; // Adjust as needed
+        if (data <= maxButtonsToShow) {
+          for (let i = 1; i <= data; i++) {
+            const button = document.createElement("button");
+            button.innerText = i;
+            button.addEventListener("click", () => {
+              page = i;
+              loadApplications(page, order);
+            });
+            buttonsContainer.appendChild(button);
+          }
+        } else {
+          const startPage = Math.max(
+            1,
+            page - Math.floor(maxButtonsToShow / 2)
+          );
+          const endPage = Math.min(data, startPage + maxButtonsToShow - 1);
+
+          if (startPage > 1) {
+            const ellipsisStart = document.createElement("span");
+            ellipsisStart.innerText = "...";
+            buttonsContainer.appendChild(ellipsisStart);
+          }
+
+          for (let i = startPage; i <= endPage; i++) {
+            const button = document.createElement("button");
+            button.innerText = i;
+            button.addEventListener("click", () => {
+              page = i;
+              loadApplications(page, order);
+            });
+            buttonsContainer.appendChild(button);
+          }
+
+          if (endPage < data) {
+            const ellipsisEnd = document.createElement("span");
+            ellipsisEnd.innerText = "...";
+            buttonsContainer.appendChild(ellipsisEnd);
+          }
+        }
+
+        const nextButton = document.createElement("button");
+        nextButton.innerHTML = "<i class='fas fa-chevron-right'></i>";
+        nextButton.addEventListener("click", () => {
+          if (page < data) {
+            page++;
+            loadApplications(page, order);
+          }
+        });
+        buttonsContainer.appendChild(nextButton);
+      });
+    });
+    function loadApplications(page = 1, order = "asc", q = "") {
+      fetch(
+        "/api/applications/all?page=" +
+          page +
+          "&order=" +
+          order +
+          "&q=" +
+          q +
+          "&limit=10"
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data.length);
+          const table = document.querySelector("#applicationsTable table");
+          table.innerHTML = ""; // Clear existing rows
+          table.innerHTML = `
+           <tr>
+        <th>Job Title</th>
+        <th>User name</th>
+        <th>Status</th>
+        <th>Approve</th>
+        <th>Deny</th>
+      </tr>
+      `;
+
+          if (data.length === 0) {
+            table.innerHTML =
+              "<tr><td colspan='5'>No applications found</td></tr>";
+          }
+          data.forEach((application) => {
+            const row = document.createElement("tr");
+
+            const jobTitleCell = document.createElement("td");
+            const jobTitleLink = document.createElement("a");
+            jobTitleLink.href = `/jobs/${application.job.id}`; // Provide the correct job link
+            jobTitleLink.textContent = application.job.title;
+            jobTitleCell.appendChild(jobTitleLink);
+            row.appendChild(jobTitleCell);
+
+            const userNameCell = document.createElement("td");
+            const userNameLink = document.createElement("a");
+            userNameLink.href = `/admin/user/${application.user.id}`; // Provide the correct user link
+            userNameLink.textContent = application.user.name;
+            userNameCell.appendChild(userNameLink);
+            row.appendChild(userNameCell);
+
+            const statusCell = document.createElement("td");
+            statusCell.textContent = application.accepted
+              ? "Accepted"
+              : application.pending
+              ? "Pending"
+              : "Rejected";
+            row.appendChild(statusCell);
+
+            const approveCell = document.createElement("td");
+            const approveButton = document.createElement("button");
+            approveButton.textContent = "Approve";
+            approveButton.addEventListener("click", () =>
+              handleApproveClick(application.id)
+            ); // Pass application.id
+
+            approveCell.appendChild(approveButton);
+
+            const denyCell = document.createElement("td");
+            const denyButton = document.createElement("button");
+            denyButton.textContent = "Deny";
+            denyButton.classList.add("deny-button");
+            denyButton.addEventListener("click", () =>
+              handleDenyClick(application.id)
+            ); // Pass application.id
+
+            denyCell.appendChild(denyButton);
+
+            row.appendChild(approveCell);
+            row.appendChild(denyCell);
+
+            table.appendChild(row);
+          });
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+    }
+
+    function handleApproveClick(applicationId) {
+      fetch(`/api/applications/${applicationId}/approve`, {
+        method: "POST",
+      })
+        .then((res) => {
+          res.json().then((data) => {
+            if (res.ok) {
+              message("Application approved", "top", "left", 4000);
+              loadApplications();
+            } else {
+              error(
+                data.message ? data.message : "Error approving application",
+                "top",
+                "left",
+                4000
+              );
+              console.error("Error approving application");
+            }
+          });
+        })
+        .catch((error) => {
+          error("Error approving application", "top", "left", 4000);
+          console.error("Error approving application:", error);
+        });
+    }
+
+    function handleDenyClick(applicationId) {
+      fetch(`/api/applications/${applicationId}/reject`, {
+        method: "POST",
+      })
+        .then((res) => {
+          if (res.ok) {
+            message("Application denied", "top", "left", 4000);
+            loadApplications();
+          } else {
+            error("Error denying application", "top", "left", 4000);
+            console.error("Error denying application");
+          }
+        })
+        .catch((error) => {
+          error("Error denying application", "top", "left", 4000);
+          console.error("Error denying application:", error);
+        });
+    }
+
+    loadApplications();
+  </script>
+</div>

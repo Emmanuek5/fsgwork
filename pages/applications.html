@@ -1,0 +1,96 @@
+<script>
+  if (!isAuth) {
+    window.location.href = "/auth/login?next_to=/applications";
+  }
+</script>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    width: 80%;
+    margin: auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+  }
+
+  .top {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .top h1 {
+    font-weight: bolder;
+    font-size: 2em;
+    color: #333;
+  }
+
+  .content {
+    border-radius: 5px;
+  }
+
+  .container a {
+    text-decoration: none;
+  }
+
+  .container a:hover {
+    text-decoration: underline;
+  }
+
+  #applicationsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  #applicationsTable th,
+  #applicationsTable td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+  }
+
+  #applicationsTable th {
+    background-color: #f2f2f2;
+  }
+</style>
+
+<div class="w3-container container w3-card-4">
+  <div class="top">
+    <h1>Applications</h1>
+  </div>
+  <div class="content w3-container">
+    <table class="w3-table" id="applicationsTable">
+      <tr>
+        <th>Job</th>
+        <th>Application Date</th>
+        <th>Status</th>
+      </tr>
+    </table>
+  </div>
+  <script>
+    fetch("/api/applications/").then((res) => {
+      res.json().then((data) => {
+        const table = document.getElementById("applicationsTable");
+        data.forEach((job) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td><a href="/jobs/${job.job.id}">${job.job.title}</a></td>
+            <td>${new Date(job.created_at).toLocaleDateString()}</td>
+            <td>${
+              job.accepted ? "Accepted" : job.pending ? "Pending" : "Rejected"
+            }</td>
+          `;
+          table.appendChild(row);
+        });
+      });
+    });
+  </script>
+</div>

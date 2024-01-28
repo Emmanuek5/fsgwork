@@ -3,7 +3,7 @@ const router = new Router();
 const usersModel = require("../models/users");
 const Mailer = require("./classes/mailer");
 const { v4 } = require("uuid");
-const { checkRequiredFields } = require("./resources/functions");
+const { checkRequiredFields, md5 } = require("./resources/functions");
 
 const mailerConfig = {
   host: "smtp.gmail.com",
@@ -33,19 +33,8 @@ router.post(
     const { email, password } = req.body;
     const result = usersModel.findOne({ email });
     if (result) {
-      if (result.password === password) {
-        if (result.is_verified) {
-          req.session.user = {
-            id: result.id,
-            username: result.username,
-            profile_image: result.profile_image,
-            email: result.email,
-            isAdmin: result.is_admin,
-            level: result.is_admin ? 1 : 0,
-            is_premium: result.is_premium,
-          };
-          res.json({ success: true, message: "Login successful" });
-        } else {
+      if (result.password === md5(password)) {
+        if (!result.is_verified) {
           const key = result.v_key;
           mailOptions.subject = "Verify your email address";
           mailOptions.to = email;
@@ -64,6 +53,30 @@ router.post(
               "Please verify your email, check your inbox for the verification link sent to your email",
           });
         }
+
+        if (result.is_banned) {
+          return res.status(400).json({
+            error: true,
+            message: "Your account has been banned",
+            banned: result.is_banned,
+          });
+        }
+
+        req.session.user = {
+          id: result.id,
+          username: result.username,
+          profile_image: result.profile_image,
+          email: result.email,
+          isAdmin: result.is_admin,
+          level: result.is_admin ? 1 : 0,
+          is_premium: result.is_premium,
+        };
+
+        res.json({
+          success: true,
+          message: "Login successful",
+          onboarding: !result.onboarding_completed,
+        });
       } else {
         res.status(400).json({ error: true, message: "Invalid password" });
       }
@@ -86,6 +99,7 @@ router.get("/verify/:key", (req, res) => {
       isAdmin: result.is_admin,
       is_premium: result.is_premium,
     };
+
     res.json({ success: true, message: "Email verified successfully" });
   } else {
     res.status(400).json({ error: true, message: "Invalid verification link" });
@@ -177,15 +191,16 @@ router.post(
     <p>http://localhost:8000/verify/${key}</p>
     <p>If you did not sign up for FSG Work Solutions, please ignore this email.</p>
     `;
+      let hashedPassword = md5(password);
       let age_n = parseInt(age);
       const result = usersModel.insert({
         id: v4(),
         username,
         name,
-        age_n,
+        age: age_n,
         gender,
         location: state + ", " + country,
-        password,
+        password: hashedPassword,
         profile_image: image,
         email,
         v_key: key,

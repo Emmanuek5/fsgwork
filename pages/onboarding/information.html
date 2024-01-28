@@ -105,19 +105,19 @@
 
 <div class="w3-container bar_container">
   <div class="onboarding_progress">
+    <div class="progress-point last">
+      <i class="fas fa-check"></i>
+    </div>
+    <div class="progress-point last">
+      <i class="fas fa-check"></i>
+    </div>
     <div class="progress-point current">
-      <i class="fas fa-circle"></i>
-    </div>
-    <div class="progress-point next">
-      <i class="fas fa-circle"></i>
-    </div>
-    <div class="progress-point next">
       <i class="fas fa-circle"></i>
     </div>
     <!-- Add more progress points as needed -->
   </div>
 </div>
-<div class="profile_container w3-container w3-card-4 w3-border">
+<div class="profile_container w3-container w3-card-4 w3-border container">
   <div class="top">
     <h1>Addition Information</h1>
   </div>
@@ -127,7 +127,7 @@
     </div>
     <form action="">
       <div class="input_container">
-        <label for="phone">Phone Number</label>
+        <label for="phone">Whatsapp Number</label>
         <input type="text" name="phone" id="phone" />
       </div>
       <div class="input_container">
@@ -138,9 +138,17 @@
     </form>
   </div>
   <script>
+    const form = document.querySelector("form");
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const formData = new FormData(form);
+      //lets make sure the number is like 08142159080
+      const passwordRegex = /^[0-9]{10}$/;
+      if (!passwordRegex.test(formData.get("phone"))) {
+        document.querySelector(".error").style.display = "block";
+        document.getElementById("error_message").textContent =
+          "Invalid phone number format. Example: 08142159080";
+      }
       fetch("/api/onboarding/information", {
         method: "POST",
         body: formData,
@@ -148,6 +156,8 @@
         res.json().then((data) => {
           if (data.success) {
             document.querySelector(".container").classList.add("slide-out");
+            document.querySelector(".current").classList.add("last");
+            document.querySelector(".last").classList.remove("current");
             setTimeout(() => {
               window.location.href = "/";
             }, 500); // Adjust the timeout duration based on your animation duration

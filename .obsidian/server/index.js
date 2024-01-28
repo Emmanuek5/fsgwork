@@ -6,8 +6,12 @@ let options = {};
 const cert_options = config.get("secure_certs");
 require("dotenv").config({ path: path.join(process.cwd(), ".env") });
 
+options = {
+  not_found: path.join(__dirname, "./resources/404.html"),
+};
 if (cert_options.enabled) {
   options = {
+    not_found: path.join(__dirname, "./resources/404.html"),
     cert: path.join(__dirname, cert_options.cert_path),
     key: path.join(__dirname, cert_options.key_path),
   };
@@ -30,6 +34,36 @@ let remote = false;
 let db_options = {};
 if (config.get("database")) {
   db_options = config.get("database");
+}
+
+if (config.get("onstart")) {
+  let spawna = config.get("onstart").spawn;
+  if (Array.isArray(spawna)) {
+    for (const item of spawna) {
+      spawn_child(item);
+    }
+  }
+}
+
+function spawn_child(cmd) {
+  const args = ["node"];
+  if (cmd.includes(" ")) {
+    args.push(...cmd.split(" "));
+  }
+  args.push(cmd);
+  const child = spawn(args[0], args.slice(1));
+  child.stdout.on("data", (data) => {
+    console.log(` ${data}`);
+  });
+  child.stderr.on("data", (data) => {
+    console.log(` ${data}`);
+  });
+  child.on("error", (error) => {
+    console.log(` ${error.message}`);
+  });
+  child.on("exit", (code) => {
+    console.log(`child process exited with code ${code}`);
+  });
 }
 
 const database = new Database(db_options);
@@ -343,3 +377,5 @@ function openUrlInBrowser(url) {
     spawn("xdg-open", [url]);
   }
 }
+
+module.exports = app;

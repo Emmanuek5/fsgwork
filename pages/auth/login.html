@@ -67,6 +67,10 @@
         .then((res) => {
           if (res.success) {
             if (!next()) {
+              if (res.onboarding) {
+                window.location.href = "/onboarding/profile";
+                return;
+              }
               window.location.href = "/";
             }
           } else {

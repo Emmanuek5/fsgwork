@@ -1,0 +1,122 @@
+<style>
+  body {
+    font-family: "Roboto", sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 80%;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    align-items: center; /* Center horizontally */
+  }
+
+  .w3-container {
+    display: inline-block;
+    margin-right: 10px;
+  }
+
+  .top {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .top h1 {
+    font-weight: bolder;
+    font-size: 2em;
+    color: #333;
+  }
+
+  .qr_image {
+    border: 2px solid #ddd;
+    padding: 10px;
+    display: none;
+    text-align: center;
+  }
+
+  #qr_image {
+    max-width: 100%;
+  }
+</style>
+
+<div class="container w3-container w3-card-4 w3-display-middle">
+  <div class="top">
+    <h1>Whatsapp Connection Status</h1>
+  </div>
+  <div class="content">
+    <div id="whatsapp">
+      <h2 id="status">Auth Status</h2>
+      <div class="qr_image">
+        <img src="" id="qr_image" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const websocket = new WebSocket("ws://localhost:3000");
+
+  websocket.onopen = () => {
+    const payload = { type: "GET_AUTH_STATUS" };
+    websocket.send(JSON.stringify(payload));
+  };
+
+  websocket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    console.log(data);
+    if (data.type === "AUTH_STATUS") {
+      const authStatus = data.payload;
+      if (!authStatus) {
+        fetchQR();
+      }
+      document.getElementById("status").innerHTML = authStatus
+        ? "Authenticated"
+        : "Not Authenticated";
+    }
+    if (data.type === "QR") {
+      const qrCodeData = data.payload;
+      document.querySelector(".qr_image").style.display = "block";
+      document.getElementById("qr_image").src = `${qrCodeData}`;
+      if (!data.error) {
+        const p = document.createElement("p");
+        p.innerHTML = "QR code is still being generated";
+        document.getElementById("qr_image").appendChild(p);
+      } else {
+        document.getElementById("qr_image").src = `${qrCodeData}`;
+      }
+      requestWaitForQR();
+    }
+    if (data.type === "QR_UPDATED") {
+      const qrCodeData = data.payload;
+
+      document.querySelector(".qr_image").style.display = "block";
+      document.getElementById("qr_image").src = `${qrCodeData}`;
+    }
+
+    if (data.type === "AUTHENTICATED") {
+      document.querySelector(".qr_image").style.display = "none";
+      document.getElementById("qr_image").style.display = "none";
+
+      document.getElementById("status").innerHTML = "Authenticated";
+    }
+  };
+
+  function fetchQR() {
+    const payload = { type: "GET_QR" };
+    websocket.send(JSON.stringify(payload));
+  }
+
+  function requestWaitForQR() {
+    const payload = { type: "WAIT_FOR_QR" };
+    websocket.send(JSON.stringify(payload));
+  }
+</script>

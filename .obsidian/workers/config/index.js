@@ -53,6 +53,9 @@ class Config {
       name: "An Obsidian App",
       mode: "dev",
       port: 3000,
+      onstart: {
+        spawn: [""],
+      },
       database: {
         name: "database",
         web_enabled: true,

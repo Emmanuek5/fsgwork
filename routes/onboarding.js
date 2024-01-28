@@ -51,7 +51,7 @@ router.post(
     }
     const result = usersModel.findAndUpdate(
       { id: user.id },
-      { phone, address }
+      { phone, address, onboarding_completed: true }
     );
     if (result) {
       res.json({ success: true, message: "Information added successfully" });

@@ -159,7 +159,7 @@
 .error-container {
     position: absolute;
     padding: 1rem;
-    background-color: #e74c3c;
+    background-color: #e74c3c !important;
     max-width: 600px;
     /* or any maximum you'd prefer */
     /* Reddish */
@@ -269,12 +269,13 @@
     position: fixed;
     padding: 1rem;
     border-radius: 4px;
+    max-width: 600px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     color: #28a745;
     /* Solid green text */
     transition: opacity 0.4s, transform 0.4s;
     z-index: 1000;
-    background: linear-gradient(135deg, #b1ff84, #a3ff7b);
+    background: linear-gradient(135deg, #b1ff84, #a3ff7b) center center no-repeat !important;
     /* Light green background with gloss */
     border: 1px solid #f4f9f4;
     /* Very light green border */

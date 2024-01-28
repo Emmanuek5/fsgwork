@@ -153,6 +153,7 @@
     document.querySelector("form").addEventListener("submit", (event) => {
       event.preventDefault();
       const formData = new FormData(event.target);
+     
       fetch("/api/job/create", {
         method: "POST",
         body: formData,

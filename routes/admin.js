@@ -76,12 +76,23 @@ router.patch("/user/:id", checkAdmin, (req, res) => {
       return;
     }
   }
-  const result = usersModel.findAndUpdate({ id }, upadate);
+  console.log(upadate, fields, values);
+  const result = usersModel.update({ id }, upadate);
 
   if (result) {
     res.json({ success: true, message: "User updated successfully" });
   } else {
     res.status(500).json({ error: true, message: "Failed to update user" });
+  }
+});
+
+router.delete("/user/:id", checkAdmin, (req, res) => {
+  const { id } = req.params;
+  const result = usersModel.delete({ id });
+  if (result) {
+    res.json({ success: true, message: "User deleted successfully" });
+  } else {
+    res.status(500).json({ error: true, message: "Failed to delete user" });
   }
 });
 
@@ -142,6 +153,16 @@ router.post("/job/edit", checkAdmin, (req, res) => {
     res.json({ success: true, message: "Job updated successfully" });
   } else {
     res.status(500).json({ error: true, message: "Failed to update job" });
+  }
+});
+
+router.delete("/job/:id", checkAdmin, (req, res) => {
+  const { id } = req.params;
+  const result = jobsModel.findOneAndDelete({ id });
+  if (result) {
+    res.json({ success: true, message: "Job deleted successfully" });
+  } else {
+    res.status(500).json({ error: true, message: "Failed to delete job" });
   }
 });
 

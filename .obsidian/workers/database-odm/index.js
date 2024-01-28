@@ -169,28 +169,32 @@ async function deleteAllRows(tableName) {
 }
 
 // Function to initialize and connect to the database server
-async function init(url, token) {
-  try {
-    setBaseURL(url); // Set the baseURL to the provided URL
-    setToken(token); // Set the token to the provided token
-    process.env.DATABASE_URL = url;
-    process.env.DATABASE_TOKEN = token;
-    // Test the connection with a listTables request
-    const response = await axios.get(`${baseURL}/listTables`, {
-      headers: {
-        Authorization: `Bearer ${db_token}`,
-      },
-    });
-    if (response.status === 200) {
-      connected = true;
-      return true;
-    } else {
-      connected = false;
-      throw new VaultError("Failed to connect to the database server.");
+function init(url, token) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      setBaseURL(url); // Set the baseURL to the provided URL
+      setToken(token); // Set the token to the provided token
+      process.env.DATABASE_URL = url;
+      process.env.DATABASE_TOKEN = token;
+      // Test the connection with a listTables request
+      const response = await axios.get(`${baseURL}/listTables`, {
+        headers: {
+          Authorization: `Bearer ${db_token}`,
+        },
+      });
+      if (response.status === 200) {
+        connected = true;
+        resolve(true);
+        return true;
+      } else {
+        console.error("Failed to connect to the database server.");
+        connected = false;
+        reject(false);
+      }
+    } catch (error) {
+      return false;
     }
-  } catch (error) {
-    return false;
-  }
+  });
 }
 
 module.exports = {

@@ -24,24 +24,21 @@
 
    .email_sent {
     display: none;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+    width: 50%;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1.2em;
+
   }
 
-  .show-email-sent {
-    opacity: 1;
-    animation: fadeIn 1s ease-in-out;
+  .email_sent p {
+    margin-bottom: 10px;
   }
+ 
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
+ 
   .input_container {
     margin-bottom: 10px;
   }
@@ -159,10 +156,14 @@
 
 </style>
 
+<div class="w3-container w3-card-4 w3-border-bottom email_sent" id="email_sent container1">
+    <h2>Verify your email</h2>
+    <p>Please check your email to verify your account.</p>
+  </div>
 <div
-  class=" container w3-card-4 w3-display-middle w3-border w3-round-large form_container w3-padding-16" 
->
-    <h1>Signup</h1>
+  class="  w3-card-4 w3-display-middle w3-border w3-round-large form_container w3-padding-16" >
+    <div class="form_content">
+      <h1>Signup</h1>
     <div class="w3-container w3-red error" id="error">
       <p class="error_message" id="error_message"></p>
     </div>
@@ -264,10 +265,8 @@
     <div class="w3-container">
       <p>Already have an account? <a href="/auth/login">Login</a></p>
     </div>
-  <div class="w3-container w3-card-4 w3-border-bottom email_sent">
-    <h2>Verify your email</h2>
-    <p>Please check your email to verify your account.</p>
-  </div>
+    </div>
+
   <script>
     const password = document.getElementById("password");
     const c_password = document.getElementById("c_password");
@@ -406,18 +405,22 @@ function calculatePasswordStrength(password) {
         body: formData,
       })
         .then((res) => res.json())
-        .then((res) => {
-          if (res.success) {
-            const container = document.querySelector(".email_sent");
-            const formContainer = document.querySelector(".form_container");
-            container.style.display = "block";
-            formContainer.style.display = "none";
-          } else {
-            const error = document.querySelector(".error");
-            error.style.display = "block";
-            error.querySelector(".error_message").innerHTML = res.message;
-          }
-        });
+       .then((res) => {
+  if (res.success) {
+    console.log("Registration Successful!"); // Log success for debugging
+    const formContainer = document.querySelector(".form_container");
+    formContainer.style.display = "none";
+    const email_sent = document.querySelector(".email_sent");
+    email_sent.style.display = "block";
+  } else {
+    const error = document.querySelector(".error");
+    error.style.display = "block";
+    error.querySelector(".error_message").innerHTML = res.message;
+  }
+})
+.catch((error) => {
+  console.error("Error during registration:", error); // Log any errors for debugging
+});
     });
   </script>
 </div>

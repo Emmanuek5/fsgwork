@@ -156,6 +156,41 @@
     margin: 0;
   }
 
+  .premium-error-container {
+    display: none;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+  }
+
+  .premium-error-container p {
+    font-weight: bold;
+    font-size: 18px;
+    font-family: "Ubuntu", sans-serif;
+    margin: 0;
+  }
+
+  .premium-error-container button {
+    margin-left: 10px;
+    background-color: #721857;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+  }
+
+  .premium-error-container button:hover {
+    background-color: #8b1878;
+  }
+
   @media screen and (max-width: 768px) {
     .job_container {
       width: calc(100% - 40px);
@@ -190,6 +225,13 @@
 </style>
 
 <div class="job_container w3-container w3-display-middle">
+  <div class="premium-error-container" id="premiumErrorContainer">
+    <p>
+      This job application requires a premium account. Upgrade to premium to
+      apply!
+    </p>
+    <button id="upgradePremium">Upgrade to Premium</button>
+  </div>
   <div class="top w3-container">
     <div class="left">
       <h1 class="job_title"></h1>
@@ -198,8 +240,8 @@
       <p class="job_description"></p>
     </div>
     <div class="right">
-      <button><i class="fas fa-paper-plane"></i>Apply</button>
-      <button><i class="fas fa-bookmark"></i>Save</button>
+      <button id="apply"><i class="fas fa-paper-plane"></i>Apply</button>
+      <button id="save"><i class="fas fa-bookmark"></i>Save</button>
     </div>
   </div>
   <div class="middle w3-container w3-row">
@@ -229,6 +271,52 @@
 
 <script>
   const id = getValue("id");
+  const applyBtn = document.getElementById("apply");
+  const saveBtn = document.getElementById("save");
+
+  applyBtn.addEventListener("click", () => {
+    fetch("/api/applications/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        job_id: id,
+      }),
+    }).then((res) => {
+      res.json().then((data) => {
+        const premiumErrorContainer = document.getElementById(
+          "premiumErrorContainer"
+        );
+
+        if (res.ok) {
+          message("Applied successfully", "top", "left", 3000);
+        } else {
+          if (data.premium_error) {
+            premiumErrorContainer.style.display = "flex";
+            premiumErrorContainer.innerHTML = "";
+
+            const p = document.createElement("p");
+            p.textContent = data.message;
+            premiumErrorContainer.appendChild(p);
+
+            const upgradeBtn = document.createElement("button");
+            upgradeBtn.textContent = "Upgrade to Premium";
+            upgradeBtn.addEventListener("click", () => {
+              window.location.href = "/premium";
+            });
+            premiumErrorContainer.appendChild(upgradeBtn);
+
+            // You can customize the upgradePremium button behavior here
+          } else {
+            // Hide premium error container if it's not a premium error
+            premiumErrorContainer.style.display = "none";
+            error(data.message, "top", "left", 3000);
+          }
+        }
+      });
+    });
+  });
 
   fetch("/api/job/" + id)
     .then((res) => res.json())
@@ -236,16 +324,16 @@
       const jobContainer = document.querySelector(".job_container");
 
       // Populate job details
-      jobContainer.querySelector(".job_title").textContent = data.name;
+      jobContainer.querySelector(".job_title").textContent = data.title;
       jobContainer.querySelector(".qualification").textContent =
         data.required_qualification;
       jobContainer.querySelector(".company").textContent = data.company;
       jobContainer.querySelector(".job_description").textContent =
         data.description;
-      jobContainer.querySelector(".start_date").textContent =
+      jobContainer.querySelector(".start_date").innerHTML =
         "Opening Period: " + data.date;
-      jobContainer.querySelector(".end_date").textContent =
-        "- " + data.close_date;
+      jobContainer.querySelector(".end_date").innerHTML =
+        " &nbsp;-&nbsp; " + data.close_date;
       jobContainer.querySelector(".job_location").textContent =
         "Location: " + data.location;
       jobContainer.querySelector(".job_pay").textContent =

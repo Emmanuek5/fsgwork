@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 function checkRequiredFields(fields) {
   return (req, res, next) => {
     for (const field of fields) {
@@ -34,4 +35,19 @@ function checkAdmin(req, res, next) {
   }
 }
 
-module.exports = { checkRequiredFields, checkAuth, checkNotAuth, checkAdmin };
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function md5(str) {
+  return crypto.createHash("md5").update(str).digest("hex");
+}
+
+module.exports = {
+  checkRequiredFields,
+  checkAuth,
+  checkNotAuth,
+  checkAdmin,
+  md5,
+  sleep,
+};

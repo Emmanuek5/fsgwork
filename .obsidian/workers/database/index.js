@@ -7,6 +7,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const axios = require("axios");
 const { log } = require("console");
+const ObsidianError = require("../../classes/ObsidianError");
 class Database {
   constructor(
     options = {
@@ -85,7 +86,10 @@ class Database {
     );
 
     if (options.remote) {
-      this.connectToRemoteServer(options.url);
+      this.connectToRemoteServer(
+        options.url.split(":")[0],
+        options.url.split(":")[1]
+      );
     }
     if (options.web_enabled) {
       this.app.listen(this.port, () => {
@@ -156,7 +160,7 @@ class Database {
     }
   }
 
-  async connectToRemoteServer(name) {
+  async connectToRemoteServer(name, token) {
     if (name.startsWith("http://") || name.startsWith("https://")) {
       try {
         // Make a GET request to the remote server to retrieve table data
@@ -169,7 +173,13 @@ class Database {
             this.tables[tableName] = new Table();
             // Fetch and insert data from the remote server for each table
             const tableResponse = await axios.get(
-              `${name}/getTable/${tableName}`
+              `${name}/getTable/${tableName}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
             );
             this.tables[tableName].insertData(tableResponse.data);
           }
@@ -505,11 +515,26 @@ class Database {
 
       // Construct the file path
       const filePath = path.join(__dirname, "data", `${this.dbName}.json`);
+      const backupFilePath = path.join(
+        __dirname,
+        "data/backups",
+        `${this.dbName}-${Date.now()}.json.bak`
+      ); // Use timestamp for a unique backup file
+
+      //delete old backup files
+      const backupFiles = fs.readdirSync(path.join(__dirname, "data/backups"));
+      for (const file of backupFiles) {
+        fs.unlinkSync(path.join(__dirname, "data/backups", file));
+      }
 
       // Convert data to JSON format
       const jsonContent = JSON.stringify(data, null, 4);
+
       // Write JSON content to the file
       fs.writeFileSync(filePath, jsonContent);
+
+      // Write JSON content to the backup file
+      fs.writeFileSync(backupFilePath, jsonContent);
 
       // If 'remote' is enabled, send data to the remote server
       if (this.remote) {
@@ -545,12 +570,12 @@ class Database {
         });
       }
 
+      console.log(`Database '${this.dbName}' loaded successfully`);
+
       // If 'remote' is enabled, connect to the remote server
       if (this.remote) {
         this.connectToRemoteServer(this.dbName);
       }
-
-      console.log(`Database '${this.dbName}' loaded successfully`);
     } catch (error) {
       console.error("Error loading database:", error.message);
     }
@@ -635,6 +660,12 @@ class Table extends EventEmitter {
     const schemaKeys = Object.keys(this.schema);
     const rowKeys = Object.keys(row);
 
+    rowKeys.forEach((key) => {
+      if (!schemaKeys.includes(key)) {
+        console.error(`Column '${key}' does not exist in the table schema.`);
+        return false;
+      }
+    });
     //crosscheck schema and row keys let itc heck if the key has a default value
     schemaKeys.forEach((key) => {
       if (
@@ -808,25 +839,18 @@ class Table extends EventEmitter {
     this.emit("save");
     return true;
   }
-
   /**
    * Find and update a row in the database based on the given query and update.
    *
    * @param {object} query - The query object used to find the row.
    * @param {object} update - The update object used to update the row.
-   * @return {boolean|Array} Returns true if a row was found and updated, otherwise returns an array with an error message.
+   * @return {boolean} Returns true if a row was found and updated, false otherwise.
    */
   findAndUpdate(query, update) {
     const results = this.find(query);
 
     if (results.length > 0) {
-      // Validate the update against the schema
-      const validation = this.validateRow(update);
-      if (validation !== true) {
-        return validation; // Return validation error
-      }
-
-      // Locate the data in the main array and update it
+      //locate the data in the main array and update it
       for (let data of this.data) {
         if (data.id === results[0].id) {
           for (const key in update) {
@@ -842,27 +866,26 @@ class Table extends EventEmitter {
   }
 
   /**
-   * Find and update a row in the database based on the given query and update.
+   * Updates a row in the database based on the given query and update object.
    *
-   * @param {object} query - The query object used to find the row.
-   * @param {object} update - The update object used to update the row.
-   * @return {boolean|Array} Returns true if a row was found and updated, otherwise returns an array with an error message.
+   * @param {object} query - The query object used to find the row to update.
+   * @param {object} update - The object containing the updated values for the row.
+   * @return {boolean} Returns true if a row was found and updated, false otherwise.
    */
   findOneAndUpdate(query, update) {
     const results = this.find(query);
-
     if (results.length > 0) {
-      // Validate the update against the schema
-      const validation = this.validateRow(update);
-      if (validation !== true) {
-        return validation; // Return validation error
-      }
-
-      // Locate the data in the main array and update it
+      //locate the data in the main array and update it
       for (let data of this.data) {
         if (data.id === results[0].id) {
           for (const key in update) {
-            data[key] = update[key];
+            if (this.schema[key]) {
+              data[key] = update[key];
+            } else {
+              throw new ObsidianError(
+                "Column does not exist in the schema: " + key
+              );
+            }
           }
         }
       }
@@ -871,156 +894,39 @@ class Table extends EventEmitter {
     } else {
       return false;
     }
+    // Emit the 'save' event after updating a row
   }
 
   /**
    * Delete the first element in the data array that matches the given query.
    *
    * @param {type} query - the query to match against the elements in the data array
-   * @return {boolean|Array} true if an element is deleted, otherwise false
+   * @return {boolean} true if an element is deleted, otherwise false
    */
   findAndDelete(query) {
     const results = this.find(query);
-
     if (results.length > 0) {
-      // Validate the query against the schema
-      const validation = this.validateRow(results[0]);
-      if (validation !== true) {
-        return validation; // Return validation error
-      }
-
       for (const row of results) {
         this.data.splice(this.data.indexOf(row), 1);
       }
-      this.emit("save");
       return true;
     } else {
       return false;
     }
+    // Emit the 'save' event after deleting a row
   }
 
-  /**
-   * Deletes rows from the data array that match the given query.
-   *
-   * @param {Object} query - The query object used to filter the rows.
-   * @return {boolean|Array} Returns true if any rows were deleted, otherwise returns an array with an error message.
-   */
-  delete(query) {
-    const results = this.find(query);
-
-    if (results.length > 0) {
-      // Validate each row against the schema
-      for (const row of results) {
-        const validation = this.validateRow(row);
-        if (validation !== true) {
-          return validation; // Return validation error
-        }
-      }
-
-      for (const row of results) {
-        this.data.splice(this.data.indexOf(row), 1);
-      }
-      this.emit("save");
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * Find and delete a row in the database based on the given query.
-   *
-   * @param {Object} query - The query object used to find the row.
-   * @return {boolean|Array} Returns true if a row was found and deleted, otherwise returns an array with an error message.
-   */
   findOneAndDelete(query) {
     const results = this.find(query);
 
     if (results.length > 0) {
-      // Validate the row against the schema
-      const validation = this.validateRow(results[0]);
-      if (validation !== true) {
-        return validation; // Return validation error
-      }
-
       const row = results[0];
       this.data.splice(this.data.indexOf(row), 1);
-      this.emit("save");
       return true;
     } else {
       return false;
     }
-  }
-
-  /**
-   * Validates the given row against the table schema.
-   *
-   * @param {Object} row - The row to be validated.
-   * @returns {boolean|Array} - Returns true if the row is valid, otherwise returns an array with an error message.
-   */
-  validateRow(row) {
-    const schemaKeys = Object.keys(this.schema);
-    const rowKeys = Object.keys(row);
-
-    // Crosscheck schema and row keys, check if the key has a default value
-    for (const key of schemaKeys) {
-      if (
-        this.schema[key].required &&
-        !rowKeys.includes(key) &&
-        row[key] === undefined &&
-        this.schema[key].default === undefined
-      ) {
-        return [
-          `Column '${key}' is required but not provided in the inserted row.`,
-        ];
-      }
-    }
-
-    for (const key in this.schema) {
-      // Check if the key is required and not provided (unless it has a default)
-      if (
-        this.schema[key].required &&
-        !rowKeys.includes(key) &&
-        this.schema[key].default === undefined
-      ) {
-        return [
-          `Column '${key}' is required but not provided in the inserted row.`,
-        ];
-      }
-
-      // Check if the default value is defined in the schema
-      if (this.schema[key].default !== undefined && row[key] === undefined) {
-        row[key] = this.schema[key].default;
-      }
-
-      // Check if the type is defined in the schema
-      if (this.schema[key].type) {
-        const expectedType = this.schema[key].type;
-        const actualType = typeof row[key];
-
-        // Check if the actual type matches the expected type
-        if (actualType !== expectedType) {
-          return [
-            `Column '${key}' must be of type '${expectedType}', but got '${actualType}'.`,
-          ];
-        }
-      }
-
-      if (this.schema[key].unique) {
-        // Check uniqueness for columns marked as unique
-        const isUnique = !this.data.some(
-          (existingRow) => existingRow[key] === row[key]
-        );
-
-        if (!isUnique) {
-          return [
-            `Column '${key}' must be unique, but a duplicate value exists.`,
-          ];
-        }
-      }
-    }
-
-    return true;
+    // Emit the 'save' event after deleting a row
   }
 
   /**
@@ -1040,6 +946,41 @@ class Table extends EventEmitter {
       return false;
     }
     // Emit the 'save' event after deleting a row
+  }
+
+  /**
+   * Updates the data in the main array based on the given query and update object.
+   *
+   * @param {Object} query - The query object used to filter the data.
+   * @param {Object} update - The update object containing the new values to update the data.
+   * @throws {Error} Invalid type for key. Expected string.
+   * @throws {Error} Value value is not unique for key.
+   * @return {boolean} Returns true if the data was successfully updated, otherwise false.
+   */
+  update(query, update) {
+    const results = this.find(query);
+    if (results.length > 0) {
+      // locate the data in the main array and update it
+      // check the keys and validate them with the schema
+      for (let data of this.data) {
+        if (data.id === results[0].id) {
+          for (const key in update) {
+            if (this.schema[key]) {
+              data[key] = update[key];
+            } else {
+              throw new ObsidianError(
+                "Column does not exist in the schema: " + key
+              );
+            }
+          }
+        }
+      }
+
+      this.emit("save");
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**

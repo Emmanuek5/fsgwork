@@ -23,6 +23,7 @@ class Server extends event.EventEmitter {
     // Create an HTTP server
     this.server = http.createServer(this.handleRequest.bind(this));
     this.sessionManager = new sessionManager(COOKIES_DIR);
+    this.not_found_html = fs.readFileSync(options.not_found, "utf-8");
 
     // Check if certificate and key options are provided for HTTPS
     if (options.cert && options.key) {
@@ -192,16 +193,22 @@ class Server extends event.EventEmitter {
     request.params = queryParameters;
 
     // Find the route handler based on path and method
-    const routeHandlers = this.findRouteHandler(path, method); // Fix the function name here
+    const routeHandlers = this.findRouteHandler(path, method, request); // Fix the function name here
 
     if (routeHandlers) {
       // If route handlers are found, execute them and pass queryParameters
       const executeHandler = (handlerIndex) => {
         if (handlerIndex < routeHandlers.length) {
-          // Call the next handler in the chain
-          routeHandlers[handlerIndex](request, response, () => {
-            executeHandler(handlerIndex + 1);
-          });
+          const handler = routeHandlers[handlerIndex];
+          if (typeof handler === "function") {
+            handler(request, response, () => {
+              executeHandler(handlerIndex + 1);
+            });
+          } else {
+            console.error(
+              `Handler at index ${handlerIndex} is not a function.`
+            );
+          }
         }
       };
 
@@ -228,7 +235,7 @@ class Server extends event.EventEmitter {
         .map((segment, index) => (index === 0 || index >= 3 ? segment : "xxx"))
         .join(".");
 
-      response.setStatus(404).send("Not Found");
+      response.setStatus(404).send(this.not_found_html);
       console.log(
         ` ${ip}  ${request.method}  ${request.path}  ${response.statusCode}  ${elapsedTime}ms`
       );
@@ -384,7 +391,7 @@ class Server extends event.EventEmitter {
    * @param {string} method - The HTTP method of the route.
    * @returns {function|null} - The route handler function or null if not found.
    */
-  findRouteHandler(path, method) {
+  findRouteHandler(path, method, request) {
     // Try to find the exact route handler first
     const routeHandlers = this.routes[path];
     if (routeHandlers && routeHandlers[method]) {
@@ -402,7 +409,11 @@ class Server extends event.EventEmitter {
     }
 
     // Try to find a dynamic route handler
-    const dynamicRouteHandler = this.findDynamicRouteHandler(path, method);
+    const dynamicRouteHandler = this.findDynamicRouteHandler(
+      path,
+      method,
+      request
+    );
     if (dynamicRouteHandler) {
       return dynamicRouteHandler;
     }
@@ -436,7 +447,7 @@ class Server extends event.EventEmitter {
    * @param {string} method - The HTTP method of the route.
    * @returns {function|null} - The dynamic route handler function or null if not found.
    */
-  findDynamicRouteHandler(path, method) {
+  findDynamicRouteHandler(path, method, request) {
     for (const routePath in this.routes) {
       if (this.routes.hasOwnProperty(routePath)) {
         const paramNames = [];
@@ -475,11 +486,8 @@ class Server extends event.EventEmitter {
             // Found a match for dynamic route parameters
 
             if (this.routes[routePath][method]) {
-              return (req, res) => {
-                // Pass the parameters to the handler
-                req.params = params;
-                this.routes[routePath][method](req, res);
-              };
+              request.params = params;
+              return this.routes[routePath][method];
             } else {
               return null;
             }
@@ -512,7 +520,7 @@ class Server extends event.EventEmitter {
       if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
         res.file(filePath);
       } else {
-        res.send("404 File not found").status(404);
+        res.send(this.not_found_html).status(404);
       }
     });
   }

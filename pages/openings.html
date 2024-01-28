@@ -1,0 +1,281 @@
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap");
+
+  .container {
+    width: 90%;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .top {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .search_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .search_container input {
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-right: 10px;
+    font-size: 16px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out;
+    outline: none;
+  }
+
+  .search_container i {
+    font-size: 20px;
+    color: #007bff;
+    cursor: pointer;
+  }
+
+  .input_container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input_container i {
+    position: absolute;
+    right: 30px;
+    font-size: 20px;
+    color: #007bff;
+    cursor: pointer;
+  }
+
+  .search_container input:focus {
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .search_container button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+
+  .search_container button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+  }
+
+  .search_container select {
+    width: 200px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-left: 10px;
+    font-size: 16px;
+    outline: none; /* Remove the default select focus outline */
+  }
+
+  .jobs_container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 0;
+  }
+
+  .jobs_container1 h2 {
+    font: size 30px;
+    text-align: center;
+    font-family: "Bebas Neue", sans-serif;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .job {
+    margin: 1cm;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    word-wrap: break-word; /* Corrected property */
+    width: calc(33.33% - 2cm);
+
+    h3 {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    h4 {
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    p {
+      color: #777;
+      margin: 10px 0;
+    }
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+
+  @media only screen and (max-width: 600px) {
+    /* Adjustments for top */
+    .top {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .search_container {
+      display: block;
+      margin-bottom: 20px;
+      padding: 10px;
+    }
+
+    .search_container select {
+      width: 100%;
+    }
+
+    .search_container input {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    /* Adjustments for container */
+    .container {
+      padding: 15px;
+      width: 100%;
+    }
+    /* Adjustments for jobs_container */
+    .jobs_container,
+    .jobs_container1 {
+      display: block;
+      word-wrap: break-word;
+      width: 100%;
+    }
+
+    .jobs_container1 h2 {
+      text-align: center;
+    }
+
+    .job {
+      margin: 1cm;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease-in-out;
+      word-wrap: break-word; /* Corrected property */
+      width: 80%; /* Adjusted width for mobile */
+      margin-right: 10px; /* Add margin to the right side */
+    }
+
+    .job .top {
+      padding-bottom: 10px; /* Add some padding to the bottom of the top section */
+      border-bottom: 1px solid #ddd; /* Add a border to separate top and bottom sections */
+    }
+
+    .bottom {
+      padding-top: 10px; /* Add some padding to the top of the bottom section */
+    }
+
+    /* Add this to ensure the job text doesn't overflow on mobile */
+    .job p {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+</style>
+<div class="container">
+  <div class="top">
+    <h1>Job Openings</h1>
+    <div class="search_container">
+      <div class="input_container">
+        <input type="text" name="job" placeholder="Search for jobs" />
+        <i class="fas fa-search"></i>
+      </div>
+      <select name="filter" id="">
+        <option value="all">All</option>
+        <option value="asc">Newest</option>
+        <option value="desc">Oldest</option>
+      </select>
+    </div>
+  </div>
+  <div class="content">
+    <div class="jobs_container"></div>
+  </div>
+  <div class="bottom_bar">
+    <div class="pagination-wheel"></div>
+    <div class="pagination-buttons"></div>
+  </div>
+  <script>
+    let order = "asc";
+    let page = 1;
+    let search = "";
+
+    document.querySelector("select").addEventListener("change", (event) => {
+      order = event.target.value;
+      fetchJobs(order, page, search);
+    });
+
+    document
+      .querySelector("input[type='text']")
+      .addEventListener("input", (event) => {
+        search = event.target.value;
+        fetchJobs(order, page, search);
+      });
+
+    function fetchJobs(order, page, search) {
+      fetch(
+        "/api/job/jobs?limit=40&page=" +
+          page +
+          "&order=" +
+          order +
+          "&q=" +
+          search +
+          ""
+      ).then((res) => {
+        res.json().then((data) => {
+          const jobsContainer = document.querySelector(".jobs_container");
+          jobsContainer.innerHTML = "";
+          if (data.length === 0) {
+            jobsContainer.innerHTML += "<h2 class='no_jobs'>No Jobs Found</h2>";
+            return;
+          }
+          data.forEach((job) => {
+            const jobElement = document.createElement("div");
+            jobElement.classList.add("job");
+
+            jobElement.innerHTML = `
+        <a href="/jobs/${job.id}">
+          <div class="top">
+            <h3>${job.title || job.name}</h3>
+            <h4>${job.company}</h4>
+            <p>${job.location}</p>
+          </div>
+          <div class="bottom">
+            <p>${job.description}</p>
+          </div>
+        </a>
+      `;
+
+            jobsContainer.appendChild(jobElement);
+          });
+        });
+      });
+    }
+
+    fetchJobs(order, page, search);
+  </script>
+</div>

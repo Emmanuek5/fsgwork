@@ -157,8 +157,8 @@ function copy(text = null) {
 function error(
   message,
   position = "top",
-  animationDelay = 3000,
-  side = "left"
+  side = "left",
+  animationDelay = 3000
 ) {
   // Create the error message element
   const errorElement = document.createElement("div");

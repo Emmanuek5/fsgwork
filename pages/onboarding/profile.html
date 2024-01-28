@@ -274,12 +274,14 @@
       }).then((res) => {
         res.json().then((data) => {
           if (data.success) {
-            document
-              .querySelector(".profile_container")
-              .classList.add("slide-out");
-            setTimeout(() => {
-              window.location.href = "/onboarding/experience";
-            }, 500); // Adjust the timeout duration based on your animation duration
+            if (validateForm()) {
+              document
+                .querySelector(".profile_container")
+                .classList.add("slide-out");
+              setTimeout(() => {
+                window.location.href = "/onboarding/experience";
+              }, 500); // Adjust the timeout duration based on your animation duration
+            }
           } else {
             document.querySelector(".error").style.display = "block";
             document.getElementById("error_message").textContent = data.message;

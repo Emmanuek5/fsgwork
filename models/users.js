@@ -46,10 +46,12 @@ table.setSchema({
   saves: {
     type: "object",
     required: false,
+    default: [],
   },
   applications: {
     type: "object",
     required: false,
+    default: [],
   },
   password: {
     type: "string",
@@ -98,6 +100,11 @@ table.setSchema({
   v_key: {
     type: "string",
     required: true,
+  },
+  is_banned: {
+    type: "boolean",
+    required: false,
+    default: false,
   },
   is_verified: {
     type: "boolean",
